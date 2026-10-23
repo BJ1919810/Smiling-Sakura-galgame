@@ -32,7 +32,16 @@ public/assets/char/
 *.dmg
 *.app
 
-# ══════════════ 内部工作记录（AI 协作记忆 / 备份 / 临时）══════════════
-# 用「先忽略目录内容、再放行 skills」的写法：直接忽略 .workbuddy/ 会让例外规则失效
-.workbuddy/*
-!.workbuddy/skills/
+# ══════════════ 内部工作记录与开发文档（不随仓库分发）══════════════
+# 仓库对外只留 README.md。记忆、备份、临时文件、经验 skill 一律不进库。
+.workbuddy/
+
+# 开发文档与剧本源：剧本产物见 src/generated/script.json（引擎直接消费）
+/README_开发总览.md
+/写作规范.md
+/剧情与设定.md
+/制作手册.md
+/技术设计.md
+/手机端安装自检.md
+/笑樱_galgame台本.md
+/compile-report.txt
