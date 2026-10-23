@@ -1,0 +1,37 @@
+[package]
+name = "xiaoying"
+version = "0.1.0"
+description = "笑樱 —— 篠宫樱线视觉小说"
+edition = "2021"
+
+# ★ Android/iOS 打包要求：Rust 侧编译为动态库（libxiaoying_lib.so）供 Activity 加载；
+#   桌面侧 main.rs 仍是薄二进制入口，逻辑主体在 lib.rs（2026-09-13 移动端改造）
+[lib]
+name = "xiaoying_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# ★ 16:9 窗口比例锁定（WM_SIZING subclass，Electron setAspectRatio 同款方案）
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.60", features = [
+  "Win32_Foundation",
+  "Win32_UI_Shell",
+  "Win32_UI_WindowsAndMessaging",
+] }
+
+[features]
+# 生产构建必须启用：generate_context! 据此把 dist/ 嵌入二进制（tauri-cli 会自动加，
+# 裸跑 cargo build 时必须显式 --features custom-protocol，否则 exe 黑屏）
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1

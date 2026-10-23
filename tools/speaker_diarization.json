@@ -1,0 +1,242 @@
+[
+  {
+    "start": 2.08,
+    "end": 3.73,
+    "speaker": "SPEAKER_00",
+    "duration": 1.65,
+    "raw_text": "お前に用があるっていうのは",
+    "result_text": "说要找你的，是这家伙。"
+  },
+  {
+    "start": 4.13,
+    "end": 4.8,
+    "speaker": "SPEAKER_00",
+    "duration": 0.66,
+    "raw_text": "こいつなんだ",
+    "result_text": "就是这家伙。"
+  },
+  {
+    "start": 8.96,
+    "end": 14.92,
+    "speaker": "SPEAKER_03",
+    "duration": 5.96,
+    "raw_text": "私三年D組の古川渚です突然お呼び立てしてしまってすみません",
+    "result_text": "我是三年D班的古川渚。突然把您叫出来，非常抱歉。"
+  },
+  {
+    "start": 16.26,
+    "end": 18.28,
+    "speaker": "SPEAKER_03",
+    "duration": 2.02,
+    "raw_text": "D組の藤林涼です",
+    "result_text": "我是D班的藤林涼。"
+  },
+  {
+    "start": 18.7,
+    "end": 20.64,
+    "speaker": "SPEAKER_03",
+    "duration": 1.94,
+    "raw_text": "調子されてるんですよね",
+    "result_text": "你很受欢迎吧。"
+  },
+  {
+    "start": 22.56,
+    "end": 23.4,
+    "speaker": "SPEAKER_03",
+    "duration": 0.85,
+    "raw_text": "すごいです",
+    "result_text": "好厉害。"
+  },
+  {
+    "start": 23.74,
+    "end": 27.19,
+    "speaker": "SPEAKER_03",
+    "duration": 3.45,
+    "raw_text": "私なんかにはとてもできないので憧れてしまいます",
+    "result_text": "对我来说根本做不到，所以很憧憬。"
+  },
+  {
+    "start": 28.04,
+    "end": 30.18,
+    "speaker": "SPEAKER_03",
+    "duration": 2.14,
+    "raw_text": "見たことないです",
+    "result_text": "我从没见过。"
+  },
+  {
+    "start": 30.76,
+    "end": 33.52,
+    "speaker": "SPEAKER_03",
+    "duration": 2.77,
+    "raw_text": "お話があるんで",
+    "result_text": "因为我有话要说。"
+  },
+  {
+    "start": 35.08,
+    "end": 39.31,
+    "speaker": "SPEAKER_00",
+    "duration": 4.23,
+    "raw_text": "こいつの気持ちは真剣なんだ。できれば真面目に答えてやってほしい。",
+    "result_text": "这家伙的感情是认真的。可以的话，希望你能认真回应她。"
+  },
+  {
+    "start": 41.04,
+    "end": 41.59,
+    "speaker": "SPEAKER_03",
+    "duration": 0.54,
+    "raw_text": "ください",
+    "result_text": "请等等。"
+  },
+  {
+    "start": 45.51,
+    "end": 47.12,
+    "speaker": "SPEAKER_01",
+    "duration": 1.61,
+    "raw_text": "性別は関係ないだろう",
+    "result_text": "性别无关吧。"
+  },
+  {
+    "start": 47.56,
+    "end": 50.06,
+    "speaker": "SPEAKER_01",
+    "duration": 2.5,
+    "raw_text": "大切なのはハートの厚さだと思うね。",
+    "result_text": "我觉得重要的是心意有多深。"
+  },
+  {
+    "start": 51.06,
+    "end": 52.88,
+    "speaker": "SPEAKER_00",
+    "duration": 1.82,
+    "raw_text": "お前もたまにはいいこと言うな",
+    "result_text": "你偶尔也会说点像样的话嘛。"
+  },
+  {
+    "start": 53.66,
+    "end": 58.01,
+    "speaker": "SPEAKER_01",
+    "duration": 4.35,
+    "raw_text": "僕は本質的にはいいやつだからね。女の子だと変でしょうか。",
+    "result_text": "我本质上是个好人嘛。如果是女孩子，会很奇怪吗？"
+  },
+  {
+    "start": 58.82,
+    "end": 59.16,
+    "speaker": "SPEAKER_03",
+    "duration": 0.34,
+    "raw_text": "うぉっ",
+    "result_text": "喔哦！"
+  },
+  {
+    "start": 59.6,
+    "end": 61.71,
+    "speaker": "SPEAKER_03",
+    "duration": 2.11,
+    "raw_text": "古川さんはとても可愛らしいです",
+    "result_text": "古川同学非常可爱。"
+  },
+  {
+    "start": 62.11,
+    "end": 63.71,
+    "speaker": "SPEAKER_03",
+    "duration": 1.6,
+    "raw_text": "でも私なんかと",
+    "result_text": "但是，和我这样的人……"
+  },
+  {
+    "start": 64.03,
+    "end": 65.8,
+    "speaker": "SPEAKER_03",
+    "duration": 1.77,
+    "raw_text": "えっと、なんと言ったらいいか…",
+    "result_text": "呃，该怎么说才好……"
+  },
+  {
+    "start": 66.65,
+    "end": 68.17,
+    "speaker": "SPEAKER_03",
+    "duration": 1.53,
+    "raw_text": "ずっと悩んでたんです",
+    "result_text": "我一直很烦恼。"
+  },
+  {
+    "start": 68.85,
+    "end": 71.06,
+    "speaker": "SPEAKER_03",
+    "duration": 2.21,
+    "raw_text": "でも勇気出そうって決めたんです",
+    "result_text": "但我决定鼓起勇气。"
+  },
+  {
+    "start": 72.81,
+    "end": 74.58,
+    "speaker": "SPEAKER_03",
+    "duration": 1.77,
+    "raw_text": "そんなに悩んでたんですか",
+    "result_text": "你竟然那么烦恼吗？"
+  },
+  {
+    "start": 74.75,
+    "end": 76.61,
+    "speaker": "SPEAKER_01",
+    "duration": 1.87,
+    "raw_text": "なんか興奮するね",
+    "result_text": "总觉得有点兴奋呢。"
+  },
+  {
+    "start": 82.64,
+    "end": 83.57,
+    "speaker": "SPEAKER_02",
+    "duration": 0.93,
+    "raw_text": "わかりました",
+    "result_text": "我明白了。"
+  },
+  {
+    "start": 84.0,
+    "end": 85.56,
+    "speaker": "SPEAKER_02",
+    "duration": 1.56,
+    "raw_text": "私も真面目に聞きます",
+    "result_text": "我也会认真听的。"
+  },
+  {
+    "start": 88.53,
+    "end": 90.77,
+    "speaker": "SPEAKER_02",
+    "duration": 2.24,
+    "raw_text": "シロォォォォォォォォォォォ",
+    "result_text": "白啊啊啊啊啊啊啊啊啊啊啊"
+  },
+  {
+    "start": 97.55,
+    "end": 100.4,
+    "speaker": "SPEAKER_02",
+    "duration": 2.85,
+    "raw_text": "な、はいお姉ちゃん!なぁ!今日!",
+    "result_text": "呐，好的，姐姐！喂！今天！"
+  },
+  {
+    "start": 101.57,
+    "end": 109.01,
+    "speaker": "SPEAKER_02",
+    "duration": 7.44,
+    "raw_text": "あんたたちねーよくもあた",
+    "result_text": "你们这些人啊——竟敢把我……"
+  },
+  {
+    "start": 103.93,
+    "end": 104.44,
+    "speaker": "SPEAKER_00",
+    "duration": 0.51,
+    "raw_text": "よっ",
+    "result_text": "哟。"
+  },
+  {
+    "start": 107.97,
+    "end": 108.6,
+    "speaker": "SPEAKER_00",
+    "duration": 0.63,
+    "raw_text": "うわあああああ",
+    "result_text": "哇啊啊啊啊啊"
+  }
+]

@@ -1,0 +1,10 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.xiaoying" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Customize your theme here. -->
+        <!-- ★ 2026-09-19（全屏修复）：允许内容画进刘海/挖孔区（配合 viewport-fit=cover
+             与 CSS 的 env(safe-area-inset-*)）；窗口底色改深色，避免冷启动白闪。 -->
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
+        <item name="android:windowBackground">@color/black</item>
+    </style>
+</resources>

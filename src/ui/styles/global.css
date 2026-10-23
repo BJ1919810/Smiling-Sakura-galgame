@@ -1,0 +1,926 @@
+/* 《笑樱》全局样式
+ *
+ * 设计基调：克制、留白、以物抒情。
+ * 配色：暗紫夜色底 + 樱粉点缀 —— 对应「黄昏长椅 / 樱花」的母题。
+ */
+
+:root {
+  --ink: #f5f2ee;
+  --ink-dim: #b8b2c4;
+  --sakura: #e8a0b4;
+  --sakura-deep: #c9738c;
+  --panel: rgba(26, 23, 32, 0.88);
+  --panel-solid: #1a1720;
+  --line: rgba(232, 160, 180, 0.28);
+  --font: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC', sans-serif;
+
+  /* 16:9 舞台矩形（由 Stage.fit() 每帧协商后写入，见下方 .screen）。
+     默认值 = 整窗，保证 JS 挂载前 UI 不塌陷。 */
+  --stage-x: 0px;
+  --stage-y: 0px;
+  --stage-w: 100vw;
+  --stage-h: 100vh;
+
+  /* ★ 2026-09-20：整体 UI 缩放的两个因子（消费方见下方 .screen）
+     --ui-auto：按舞台高度自动算的因子，Stage.applyFit 写入（桌面 1.0 / 手机约 0.6）
+     --ui-user：玩家在「设置 → 界面大小」里的倍率，App.tsx 写入（1 ＝ 纯自动） */
+  --ui-auto: 1;
+  --ui-user: 1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #12101a;
+  font-family: var(--font);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ★★ 2026-09-20（主人反馈两处）：
+ *   ① Android：**整个界面能长按/拖拽选中，一片蓝**（选中的是顶部状态条与对话框文字）；
+ *   ② 桌面端：同学反馈**文字可被选中，没有高级感**。
+ *   同一个根因 —— 游戏画面不该有「网页文本选择」这套浏览器行为。
+ *   对策：全局禁选 + 禁长按弹出菜单 + 禁图片拖拽。
+ *   ⛔ 不要改成 user-select: text —— 那是网页思维，游戏 UI 一旦能选中，
+ *      拖拽推进剧情就会误触发选择高亮（Android 上尤其明显）。
+ *   ⚠️ textarea/input 例外（设置面板若将来有输入框，仍要能选、能放光标）。 */
+html,
+body,
+#root,
+.app,
+.screen {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none; /* iOS/Android 长按不弹「拷贝/搜索」菜单 */
+  -webkit-tap-highlight-color: transparent; /* 移动端点按不闪灰色方块 */
+}
+
+/* 可编辑控件保留正常文本行为（否则光标、选区、粘贴全废） */
+input,
+textarea,
+[contenteditable='true'] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* 图片/画布一律不可拖拽（Android 长按图片会被系统拖走/另存），且本身不吃事件。
+ * ⛔ 这里**只禁拖拽，不动 pointer-events** —— PixiJS 的 canvas 铺在 `.stage-host` 里，
+ *    而「点击任意处推进剧情」靠的是**排在它上面**的 `.click-layer`(z-index:10)。
+ *    若给 canvas 加 pointer-events:none，虽然 click-layer 仍在上层不受影响，
+ *    但一旦将来把点击层挪到 canvas 下方（或 canvas 上再叠覆盖层），
+ *    事件就会**穿透到 body** —— 点击推进整条链路静默失效，且没有任何报错。
+ *    收益（多一层穿透）远小于风险，故不加。 */
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
+
+canvas {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+/* 可交互控件确保收事件（父级若被置为 none 时兜底） */
+button,
+a,
+[role='button'],
+.click-layer {
+  pointer-events: auto;
+}
+
+.app {
+  /* ★ 2026-09-19（Android 修复）：改用 fixed + inset 贴住**布局视口**。
+     旧写法 width:100vw/height:100vh 在 Android WebView 上与 window.innerHeight
+     不一致（vh 取的是「最大视口」，系统栏/键盘弹出时不变）⇒ JS 算出来的信标矩形
+     与 .app 盒子对不上，整套 UI 就会整体错位。fixed+inset 与 innerHeight 同源。 */
+  position: fixed;
+  inset: 0;
+}
+
+/* 舞台矩形：画面（PixiJS 设计坐标系）与 DOM UI 的**唯一共同坐标原点**。
+ *
+ * PixiJS canvas 铺满整窗，内部把 1920×1080 等比 letterbox；这里用同一组
+ * CSS 变量把 UI 也约束到那块矩形上 —— 于是「画面在哪儿，UI 就在哪儿」。
+ * 窗口锁定 16:9 时该矩形 == 整窗（视觉零变化）；一旦比例异常（如独占全屏
+ * 撞上非 16:9 显示器），UI 也不会飘到黑边上，而是老老实实待在画面里。
+ *
+ * ★★ 内部单位一律 CSS px；**整体大小由 `--ui-zoom` 统一缩放**（2026-09-20 第二轮定稿）。
+ *
+ *   演进史（别再走回头路）：
+ *   ① 2026-09-19「1920×1080 设计画布 + `transform: scale(--ui-scale)`」，想让 UI 视觉恒定。
+ *      ⇒ 主人实测**偏小**：手机 s = 0.380，21px 正文只剩 **8.0 CSS px**，读不了。
+ *   ② 2026-09-20 回退成**纯 px**（`.screen` = 舞台矩形，因子 1.0）。
+ *      ⇒ 主人实测**偏大**：UI 不随画面缩小，手机舞台上对话框占屏高 50%、
+ *        状态条把「菜单」按钮挤出屏幕外。
+ *   ③ 中途还试过「px→em」：既算错基准，又会在自带 font-size 的元素上二次复合 —— 已弃。
+ *
+ *   ⇒ 现行 = **折中**：`--ui-zoom = --ui-auto × --ui-user`
+ *      · `--ui-auto = clamp(stageH / 720, 0.6, 1)`（Stage.applyFit 写入）
+ *        基准 720 ⇒ 1280×720 / 1600×900 / 1920×1080 的桌面窗口因子恒为 **1.0（桌面零变化）**；
+ *        手机 891×410 取 **0.6** ⇒ 对话框由占屏 50% 降到 30%、正文 21px → 12.6px。
+ *      · `--ui-user` ＝「设置 → 界面大小」的倍率（默认 1 ＝ 纯自动），
+ *        给玩家真机定档用，免得反复出包。
+ *
+ *   ★ 手法：**先按 `stage / zoom` 布局，再整体 `scale(zoom)`**
+ *     ⇒ px 与 % 一起等比缩放（`.dialog-wrap` 的 `min(1240px, 86%)` 仍等于「86% 舞台宽」），
+ *       不必去改下游几百条声明。
+ *   ⚠️ `transform` 会为后代建立 `position: fixed` 的包含块 ⇒ `.screen` 内**不许有 fixed 元素**
+ *      （`.runtime-err` 在 `.screen` 外，安全）。
+ *   ⛔ 内部**不要用 vh/vw**（视口单位不随本元素缩放，会再度失配）。 */
+.screen {
+  /* 两个因子都在本元素可继承到作用域内 ⇒ 在这里合成，别放到 :root（那里看不到 --ui-user） */
+  --ui-zoom: calc(var(--ui-auto, 1) * var(--ui-user, 1));
+  position: absolute;
+  left: var(--stage-x);
+  top: var(--stage-y);
+  /* 布局空间 = 舞台 / 缩放，再整体放大回来 ⇒ 恰好铺满舞台矩形 */
+  width: calc(var(--stage-w, 100vw) / var(--ui-zoom));
+  height: calc(var(--stage-h, 100vh) / var(--ui-zoom));
+  transform: scale(var(--ui-zoom));
+  transform-origin: 0 0;
+  overflow: hidden;
+}
+
+.stage-host {
+  position: absolute;
+  inset: 0;
+}
+
+.stage-host canvas {
+  display: block;
+  /* ★ 拖动窗口时渲染缓冲是「延后重分配」的（见 Stage.fit()，修拖动闪烁）——
+     拖动中旧缓冲由 CSS 拉伸跟随窗口（跟手、零 WebGL 缓冲重建、零闪烁），
+     静止 150ms 后缓冲对齐。!important 压过 Pixi autoDensity 写的内联尺寸。 */
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 点击层：整屏可点推进剧情 */
+.click-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  cursor: pointer;
+}
+
+/* ---------- 顶部状态条 ---------- */
+
+.status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* ★ 2026-09-19（Android）：叠上安全区（刘海/挖孔）—— 横屏时挖孔在左右侧，
+     否则「第3章」「菜单」这些 chip 会被挖孔压住。桌面端 env() 恒为 0，无副作用。
+     下面先写基础 padding 作为回退（老 WebView 不支持 env()/var() 混合时用）。 */
+  padding: 10px 16px;
+  /* ★ 2026-09-20：安全区偏移必须 **除以 --ui-zoom**。
+     env() 返回的是**真实 CSS px**，而 `.screen` 里的一切会被 scale(--ui-zoom) 一起缩放
+     ⇒ 不除的话 zoom=0.6 时刘海安全区只生效 60%，chip 仍会被挖孔压住。
+     （前面的 16px 是设计 px，**应当**跟着缩放，所以不除。） */
+  padding: 10px calc(16px + env(safe-area-inset-right, 0px) / var(--ui-zoom, 1))
+    10px calc(16px + env(safe-area-inset-left, 0px) / var(--ui-zoom, 1));
+  font-size: 13px;
+  background: linear-gradient(180deg, rgba(18, 16, 26, 0.82) 0%, transparent 100%);
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.chip {
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--ink-dim);
+  white-space: nowrap;
+  letter-spacing: 0.4px;
+}
+
+.chip-bgm {
+  color: var(--sakura);
+}
+
+.chip-dim {
+  opacity: 0.6;
+  margin-left: auto;
+}
+
+.chip-btn {
+  pointer-events: auto;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  transition: all 0.16s;
+}
+
+.chip-btn:hover {
+  background: var(--sakura-deep);
+  border-color: var(--sakura);
+  color: #fff;
+}
+
+/* ---------- 场景切换提示 ---------- */
+
+.toast {
+  position: absolute;
+  top: 58px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 28;
+  padding: 8px 20px;
+  border-radius: 4px;
+  background: rgba(18, 16, 26, 0.9);
+  border-left: 3px solid var(--sakura);
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: var(--ink);
+  pointer-events: none;
+  animation: toast-in 0.4s ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* ---------- 对话框 ---------- */
+
+.dialog-wrap {
+  position: absolute;
+  left: 50%;
+  bottom: 2.5%; /* 2026-09-12 主人定：往下靠一些 */
+  transform: translateX(-50%);
+  z-index: 20;
+  width: min(1240px, 86%);
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+
+/* 右键隐藏 UI：看画面用（对话框 / 状态条 / 场景提示一并淡出，左键或空格恢复） */
+.app.ui-hidden .dialog-wrap,
+.app.ui-hidden .status-bar {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.app.ui-hidden .toast {
+  opacity: 0;
+  animation: none;
+  pointer-events: none;
+}
+
+.backlog-panel {
+  width: min(860px, 92%);
+}
+
+.backlog-list {
+  max-height: 626px; /* ★ 设计像素（＝1080 的 58%）——⛔ 不用 58vh：视口单位不随设计画布缩放 */
+  overflow-y: auto;
+  padding: 4px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.backlog-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding-bottom: 8px;
+}
+
+.backlog-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+}
+
+.backlog-who {
+  color: var(--sakura-deep);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.backlog-play {
+  border: 1px solid var(--sakura);
+  background: transparent;
+  color: var(--sakura-deep);
+  border-radius: 4px;
+  width: 26px;
+  height: 20px;
+  line-height: 1;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.backlog-play:hover {
+  background: var(--sakura-deep);
+  color: #fff;
+}
+
+.backlog-text {
+  margin: 2px 0 0;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+.backlog-narration {
+  color: var(--ink);
+  opacity: 0.72;
+}
+
+.backlog-empty {
+  color: var(--ink);
+  opacity: 0.6;
+  text-align: center;
+  padding: 24px 0;
+}
+
+/* 姓名框 */
+.name-box {
+  display: inline-block;
+  margin-left: 18px;
+  padding: 7px 26px;
+  background: linear-gradient(135deg, var(--sakura-deep) 0%, var(--sakura) 100%);
+  color: #2a1a20;
+  /* ★ 2026-09-18：随正文字号一起缩放（--text-scale 由 App.tsx 写入） */
+  font-size: calc(19px * var(--text-scale, 1));
+  font-weight: 700;
+  letter-spacing: 3px;
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 -2px 12px rgba(201, 115, 140, 0.3);
+}
+
+/* 正文框 */
+.text-box {
+  position: relative;
+  padding: 26px 32px 30px;
+  /* 2026-09-12 主人定：透明度调高（更透出立绘与背景），靠 blur 保持可读性 */
+  background: rgba(26, 23, 32, 0.55);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  /* ★ 2026-09-18：随白线修复一并关闭 `backdrop-filter`（当时是与 antialias 并列的一刀）。
+     ⚠️ **归因未做**：白线修复的两条改动（本行 ＋ `Stage.ts` 的 `antialias: false`）是叠加的，
+     没有单独验证过到底哪一条在起作用（主人实机确认的是「两条都在」的那版包干净）。
+     ⇒ 若日后想恢复毛玻璃底（设计原意）：**必须重新走一遍白线验证**；同时建议把上面的
+        `background` 提到 `rgba(26, 23, 32, 0.72)` 一档补可读性（关掉 blur 后 0.55 偏透）。
+     备份：`.workbuddy/backup/global.css_关blur前_20260918.css`；完整结论见 `技术设计.md` 附录 B.4 #9。 */
+  /* backdrop-filter: blur(8px); */
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
+  min-height: 148px;
+}
+
+.text-box p {
+  margin: 0;
+  /* ★ 2026-09-18：正文字号走 --text-scale（设置面板「文字大小」小/标准/大/特大，App.tsx 写入）。
+     只改字号，不动行高/字距/配色。 */
+  font-size: calc(21px * var(--text-scale, 1));
+  line-height: 1.95;
+  letter-spacing: 0.8px;
+  color: var(--ink);
+  white-space: pre-wrap;
+  /* 中文排版：避头尾 */
+  word-break: break-word;
+  text-wrap: pretty;
+}
+
+/* 旁白：无姓名框时，正文略微降调并缩进 */
+.text-narration {
+  color: var(--ink-dim) !important;
+}
+
+/* 括注旁白：孤立成行的 （括注） —— 当轻小说式的括注旁白处理，
+   括号与文字都用旁白色（--ink-dim），与角色台词区分开。
+   判定在 App.tsx 的 renderDialogue()：整行匹配 ^（…）$ 即视为括注 */
+.text-aside {
+  color: var(--ink-dim);
+}
+
+/* 心声：斜体 + 樱粉调 */
+.text-inner p {
+  font-style: italic;
+  color: var(--sakura) !important;
+  opacity: 0.94;
+}
+
+/* 打字机光标 */
+.caret {
+  display: inline-block;
+  color: var(--sakura);
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* 下一句提示 */
+.next-hint {
+  position: absolute;
+  right: 20px;
+  bottom: 12px;
+  color: var(--sakura);
+  font-size: 15px;
+  animation: bob 1.4s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(4px);
+    opacity: 1;
+  }
+}
+
+/* ---------- 选项 ---------- */
+
+.choice-layer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(760px, 80%);
+  animation: choice-in 0.32s ease-out;
+}
+
+@keyframes choice-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.choice-title {
+  align-self: flex-start;
+  padding: 5px 16px;
+  background: var(--panel);
+  border-left: 3px solid var(--sakura);
+  font-size: 13px;
+  color: var(--ink-dim);
+  letter-spacing: 2px;
+}
+
+.choice-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 17px 24px;
+  /* ★ 提高不透明度：立绘压暗后仍保证按钮文字可读 */
+  background: rgba(26, 23, 32, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 19px;
+  letter-spacing: 1px;
+  text-align: left;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.18s;
+}
+
+.choice-btn:hover {
+  background: rgba(201, 115, 140, 0.24);
+  border-color: var(--sakura);
+  transform: translateX(6px);
+}
+
+.choice-key {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--sakura-deep);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ---------- 标题画面 ---------- */
+
+.title-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(42, 30, 44, 0.55) 0%,
+    rgba(18, 16, 26, 0.88) 70%
+  );
+}
+
+.title-crest {
+  font-size: 40px;
+  color: var(--sakura);
+  opacity: 0.85;
+  margin-bottom: 4px;
+}
+
+.title-main {
+  margin: 0;
+  font-size: 96px;
+  font-weight: 500;
+  letter-spacing: 32px;
+  text-indent: 32px; /* 抵消最后一字的字距，视觉居中 */
+  color: var(--ink);
+  text-shadow: 0 4px 30px rgba(232, 160, 180, 0.35);
+}
+
+.title-sub {
+  font-size: 15px;
+  letter-spacing: 6px;
+  color: var(--ink-dim);
+  margin-bottom: 42px;
+}
+
+.title-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 260px;
+}
+
+.title-btn {
+  padding: 14px 0;
+  background: rgba(26, 23, 32, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 18px;
+  letter-spacing: 8px;
+  text-indent: 8px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.18s;
+}
+
+.title-btn:hover:not(:disabled) {
+  background: rgba(201, 115, 140, 0.3);
+  border-color: var(--sakura);
+  letter-spacing: 12px;
+  text-indent: 12px;
+}
+
+.title-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.title-btn-dim {
+  font-size: 15px;
+  letter-spacing: 3px;
+  text-indent: 3px;
+  color: var(--ink-dim);
+}
+
+/* ★ 2026-09-20 构建号：标在标题屏右下角。
+   用途是**让主人一眼确认装的是哪次构建**（此前两次误判「包没打对」）。
+   故意做得不显眼（低透明度、小字号），不干扰正常观感。 */
+.title-build {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--ink-dim);
+  opacity: 0.45;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.title-foot {
+  position: absolute;
+  bottom: 22px;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--ink-dim);
+  opacity: 0.55;
+}
+
+/* ---------- 存读档面板 ---------- */
+
+.panel-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  background: rgba(12, 10, 18, 0.7);
+  backdrop-filter: blur(4px);
+  animation: toast-in 0.25s ease-out;
+}
+
+.panel {
+  width: min(680px, 88%);
+  padding: 26px 28px;
+  background: rgba(26, 23, 32, 0.96);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 60px rgba(0, 0, 0, 0.6);
+}
+
+.panel-title {
+  font-size: 17px;
+  letter-spacing: 6px;
+  color: var(--sakura);
+  margin-bottom: 18px;
+  padding-left: 2px;
+}
+
+.slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slot-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: rgba(18, 16, 26, 0.6);
+  border: 1px solid rgba(232, 160, 180, 0.16);
+  border-radius: 6px;
+  color: var(--ink);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.slot-row:hover:not(:disabled) {
+  border-color: var(--sakura);
+  background: rgba(201, 115, 140, 0.16);
+}
+
+.slot-disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.slot-name {
+  flex-shrink: 0;
+  width: 44px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--sakura);
+}
+
+.slot-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.slot-line1 {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.slot-line2 {
+  font-size: 12px;
+  color: var(--ink-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slot-info-empty {
+  color: var(--ink-dim);
+  opacity: 0.6;
+  font-size: 13px;
+}
+
+.slot-time {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--ink-dim);
+  opacity: 0.7;
+}
+
+.panel-close {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink-dim);
+  font-family: inherit;
+  font-size: 14px;
+  letter-spacing: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.panel-close:hover {
+  color: var(--ink);
+  border-color: var(--sakura);
+}
+
+/* ---------- 设置面板 ---------- */
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(232, 160, 180, 0.1);
+}
+
+.setting-label {
+  flex-shrink: 0;
+  width: 96px;
+  font-size: 15px;
+  color: var(--ink);
+  letter-spacing: 2px;
+}
+
+.setting-row input[type='range'] {
+  flex: 1;
+  accent-color: var(--sakura);
+  height: 4px;
+}
+
+.setting-value {
+  flex-shrink: 0;
+  width: 40px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--ink-dim);
+}
+
+.setting-seg {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.seg-btn {
+  flex: 1;
+  padding: 8px 0;
+  background: rgba(18, 16, 26, 0.6);
+  border: 1px solid rgba(232, 160, 180, 0.16);
+  border-radius: 4px;
+  color: var(--ink-dim);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.seg-btn:hover {
+  border-color: var(--sakura);
+}
+
+.seg-on {
+  background: rgba(201, 115, 140, 0.28);
+  border-color: var(--sakura);
+  color: var(--ink);
+}
+
+.toggle {
+  width: 64px;
+  padding: 8px 0;
+  background: rgba(18, 16, 26, 0.6);
+  border: 1px solid rgba(232, 160, 180, 0.16);
+  border-radius: 4px;
+  color: var(--ink-dim);
+  font-family: inherit;
+  font-size: 14px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.toggle-on {
+  background: rgba(201, 115, 140, 0.32);
+  border-color: var(--sakura);
+  color: var(--ink);
+}
+
+.chip-on {
+  background: rgba(201, 115, 140, 0.32) !important;
+  border-color: var(--sakura) !important;
+  color: var(--ink) !important;
+}
+
+/* ---------- 未完待续 ---------- */
+
+.finished {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: rgba(18, 16, 26, 0.94);
+  animation: toast-in 0.6s ease-out;
+}
+
+.finished-inner {
+  text-align: center;
+}
+
+.finished h1 {
+  margin: 0 0 12px;
+  font-size: 52px;
+  letter-spacing: 12px;
+  color: var(--sakura);
+  font-weight: 500;
+}
+
+.finished p {
+  margin: 6px 0;
+  color: var(--ink-dim);
+  letter-spacing: 2px;
+}
+
+.finished-vars {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 22px !important;
+}
+
+.finished button {
+  padding: 11px 32px;
+  font-size: 15px;
+}
+
+/* ---------- 运行时错误提示（2026-09-19） ----------
+   发给别人的版本出问题时屏上直接显示原因（远程诊断用）。
+   右上角、暗红、小字、点击可关、10s 自动消退；z-index 压过所有面板。 */
+.runtime-err {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 70;
+  max-width: 46%;
+  padding: 7px 12px;
+  border-radius: 4px;
+  background: rgba(66, 18, 22, 0.92);
+  border-left: 3px solid #d96a5b;
+  color: #ffe9e4;
+  font-size: 13px;
+  line-height: 1.55;
+  cursor: pointer;
+  user-select: none;
+  animation: runtime-err-in 0.25s ease-out;
+}
+
+@keyframes runtime-err-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

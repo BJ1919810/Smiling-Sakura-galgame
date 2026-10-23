@@ -1,0 +1,903 @@
+{
+  "version": 3,
+  "generatedAt": "2026-09-16T17:28:03.573Z",
+  "note": "pose 三轴分解 v3（坐姿全线取消版，2026-09-12 主人拍板；归则见 制作手册.md 附录 A）。body 恒为「站」，不再产出 body=坐/蹲；座位画面感由 CG／演出承担。归则① 纯动作→角色默认 face；② 情绪词→表情组；hands 词表 10 个（系鞋带移除、新增思索手势）。schema 变更：v2 的 bodyByScene / sceneFixedTotal 已随归则③作废删除。",
+  "bodyPolicy": "站（坐姿全线取消）",
+  "chars": {
+    "亚里沙": {
+      "stem": "arisa",
+      "poses": [
+        {
+          "pose": "邻座・翻笔记本",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "打量",
+          "scene": "教学楼・二年级教室｜教室_早晨"
+        },
+        {
+          "pose": "邻座・翻单词表",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "打量",
+          "scene": "教学楼・二年级教室｜教室_午休_喧闹"
+        },
+        {
+          "pose": "邻座・探身",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "打量",
+          "scene": "教学楼・二年级教室｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "转回去・又补一句",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "打量",
+          "scene": "教学楼・二年级教室｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "盯着他・似笑非笑",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "脸沉",
+          "scene": "教学楼・二年级教室｜教室_早晨"
+        },
+        {
+          "pose": "掏出糖・转了一圈",
+          "count": 1,
+          "body": "站",
+          "hands": "糖",
+          "face": "打量",
+          "scene": "教学楼・二年级教室｜教室_早晨"
+        },
+        {
+          "pose": "认真・回过头",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "脸沉",
+          "scene": "教学楼・二年级教室｜教室_早晨"
+        },
+        {
+          "pose": "侧头打量我",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "脸沉",
+          "scene": "教学楼・二年级教室｜教室_午后斜阳"
+        },
+        {
+          "pose": "吃着便当・抬头",
+          "count": 1,
+          "body": "站",
+          "hands": "便当",
+          "face": "打量",
+          "scene": "教学楼・教室门口｜教室_午休"
+        }
+      ],
+      "summary": {
+        "body": [
+          "站"
+        ],
+        "hands": [
+          "糖",
+          "便当"
+        ],
+        "face": [
+          "打量",
+          "脸沉"
+        ],
+        "needsReview": 0
+      }
+    },
+    "阳太": {
+      "stem": "yota",
+      "poses": [
+        {
+          "pose": "窗边・手里夹着面包",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "笑",
+          "scene": "教学楼・二年级教室｜教室_午休_喧闹"
+        },
+        {
+          "pose": "喘・弯腰撑膝",
+          "count": 1,
+          "body": "站",
+          "hands": "其他手部",
+          "face": "喘",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "嬉笑",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "笑",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "坐着",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "笑",
+          "scene": "操场｜操场_大风"
+        },
+        {
+          "pose": "站着",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "笑",
+          "scene": "教学楼・中庭水龙头旁｜中庭_水龙头"
+        },
+        {
+          "pose": "留在原地",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "笑",
+          "scene": "中庭｜中庭_水龙头"
+        },
+        {
+          "pose": "拎着面包袋・尴尬",
+          "count": 1,
+          "body": "站",
+          "hands": "饮料",
+          "face": "笑",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_阴天"
+        },
+        {
+          "pose": "顿了一下・自然地走过去",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "笑",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "拦住我・攥着饮料",
+          "count": 1,
+          "body": "站",
+          "hands": "饮料",
+          "face": "笑",
+          "scene": "教学楼・二年级教室｜教室_放学后"
+        }
+      ],
+      "summary": {
+        "body": [
+          "站"
+        ],
+        "hands": [
+          "其他手部",
+          "饮料"
+        ],
+        "face": [
+          "笑",
+          "喘"
+        ],
+        "needsReview": 0
+      }
+    },
+    "龙司": {
+      "stem": "ryuji",
+      "poses": [
+        {
+          "pose": "不耐・起身",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "不耐",
+          "scene": "教学楼・二年级教室｜教室_午休_喧闹"
+        },
+        {
+          "pose": "脸沉・站在原地不动",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "脸沉",
+          "scene": "操场｜操场_晴天_大风"
+        },
+        {
+          "pose": "极淡的松・仰头心声",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下｜旧校舍_傍晚_樱树"
+        },
+        {
+          "pose": "坐着・无语",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "无语",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "蹲下・拧螺丝",
+          "count": 1,
+          "body": "站",
+          "hands": "螺丝",
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_傍晚_长椅"
+        },
+        {
+          "pose": "站立・停顿",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "看台第三排・坐着",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "操场｜操场_大风"
+        },
+        {
+          "pose": "转身・快步离开",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "操场・跑道上｜操场_大风"
+        },
+        {
+          "pose": "走廊柱子后",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "教学楼・中庭水龙头旁｜中庭_水龙头"
+        },
+        {
+          "pose": "转身・极其平静",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "教学楼・中庭水龙头旁｜中庭_水龙头"
+        },
+        {
+          "pose": "走近・坐下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "操场・旧长椅｜旧长椅_夕阳"
+        },
+        {
+          "pose": "右端坐下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_阴天"
+        },
+        {
+          "pose": "楼梯口・停下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "教学楼・走廊｜教室_空旷_傍晚"
+        },
+        {
+          "pose": "走进・站在樱前面",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "教学楼・走廊 → 北校舍岔路｜校舍间岔路_杂草"
+        },
+        {
+          "pose": "跌坐・撑地",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "教学楼・走廊 → 北校舍岔路｜校舍间岔路_杂草"
+        },
+        {
+          "pose": "拿起糖・拆开",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "我的房间｜房间_书桌_夜"
+        },
+        {
+          "pose": "走过去・坐下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "脸色瞬间沉下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "脸沉",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "走到长椅前・停下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_夕阳"
+        },
+        {
+          "pose": "极淡的松・低声像说给风听",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_夕阳"
+        },
+        {
+          "pose": "系鞋带",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "操场｜操场_午后"
+        },
+        {
+          "pose": "手顿住",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "操场｜操场_午后"
+        },
+        {
+          "pose": "转头・无表情",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "操场｜操场_午后"
+        },
+        {
+          "pose": "在右端坐下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_暮色"
+        },
+        {
+          "pose": "抬头看天・极淡的松",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_暮色"
+        },
+        {
+          "pose": "座位・课本摊开",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "教学楼・二年级教室｜教室_午休"
+        },
+        {
+          "pose": "把课本塞进抽屉・手指顿了一下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "教学楼・二年级教室｜教室_午休"
+        },
+        {
+          "pose": "左端坐下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・岔路｜校舍间岔路_杂草"
+        },
+        {
+          "pose": "面无表情",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・岔路｜旧长椅_午间"
+        },
+        {
+          "pose": "拆糖",
+          "count": 1,
+          "body": "站",
+          "hands": "糖",
+          "face": "平静",
+          "scene": "北校舍・岔路｜旧长椅_午间"
+        },
+        {
+          "pose": "站在原地・不动",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・岔路｜旧长椅_午间"
+        },
+        {
+          "pose": "坐在樱习惯的位置旁",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_黄昏"
+        },
+        {
+          "pose": "抽出便条・捏在手里",
+          "count": 1,
+          "body": "站",
+          "hands": "便条",
+          "face": "平静",
+          "scene": "教学楼・二年级教室 → 北校舍｜教室_午休"
+        },
+        {
+          "pose": "另一端坐下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_午后"
+        },
+        {
+          "pose": "手伸进内袋・又松开",
+          "count": 1,
+          "body": "站",
+          "hands": "其他手部",
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_午后"
+        },
+        {
+          "pose": "坐在长椅中间・攥着糖",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_黄昏"
+        },
+        {
+          "pose": "掏出手机",
+          "count": 1,
+          "body": "站",
+          "hands": "手机",
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_黄昏"
+        }
+      ],
+      "summary": {
+        "body": [
+          "站"
+        ],
+        "hands": [
+          "螺丝",
+          "糖",
+          "便条",
+          "其他手部",
+          "手机"
+        ],
+        "face": [
+          "不耐",
+          "脸沉",
+          "平静",
+          "无语"
+        ],
+        "needsReview": 0
+      }
+    },
+    "樱": {
+      "stem": "sakura",
+      "poses": [
+        {
+          "pose": "抬眼・无表情",
+          "count": 2,
+          "body": "站",
+          "hands": null,
+          "face": "抬眼",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_长椅"
+        },
+        {
+          "pose": "抬眼看我",
+          "count": 2,
+          "body": "站",
+          "hands": null,
+          "face": "抬眼",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_长椅"
+        },
+        {
+          "pose": "默读・坐姿",
+          "count": 2,
+          "body": "站",
+          "hands": "书",
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "坐着・默读",
+          "count": 2,
+          "body": "站",
+          "hands": "书",
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "忽然开口",
+          "count": 2,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "平静",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_长椅"
+        },
+        {
+          "pose": "微微歪头",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "微微歪头",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_长椅"
+        },
+        {
+          "pose": "极细微的变化",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "眼睛微弯",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_长椅"
+        },
+        {
+          "pose": "合上书・转头",
+          "count": 1,
+          "body": "站",
+          "hands": "书",
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "转头",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "含着糖・停顿",
+          "count": 1,
+          "body": "站",
+          "hands": "糖",
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "起立・九十度鞠躬",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "起身・收书・微微一鞠躬",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "捧书・默读",
+          "count": 1,
+          "body": "站",
+          "hands": "书",
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "合上书・抬头",
+          "count": 1,
+          "body": "站",
+          "hands": "书",
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "拍了拍身旁的椅面",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "把糖并排收进口袋",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "指尖摩挲书脊・低声",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "站着・抱书",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "教学楼・走廊 → 北校舍岔路｜校舍间岔路_杂草"
+        },
+        {
+          "pose": "蹲下・伸手",
+          "count": 1,
+          "body": "站",
+          "hands": "其他手部",
+          "face": "平静",
+          "scene": "教学楼・走廊 → 北校舍岔路｜校舍间岔路_杂草"
+        },
+        {
+          "pose": "站起・挡在龙司前面",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "教学楼・走廊 → 北校舍岔路｜校舍间岔路_杂草"
+        },
+        {
+          "pose": "蹲下・低着头",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "教学楼・走廊 → 北校舍岔路｜校舍间岔路_杂草"
+        },
+        {
+          "pose": "抬头・眼睛微微睁大",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "指尖停在封面上",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "偏头看我・眼睛很亮",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "微微点头",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧校舍_樱树_正午"
+        },
+        {
+          "pose": "拿着透明糖・翻看",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_夕阳"
+        },
+        {
+          "pose": "体操服・平静・站在弯道压腿",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "操场｜操场_午后"
+        },
+        {
+          "pose": "停下・回头",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "平静",
+          "scene": "操场｜操场_放学前的间隙"
+        },
+        {
+          "pose": "抬眼・认真",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "抬眼",
+          "scene": "操场｜操场_放学前的间隙"
+        },
+        {
+          "pose": "低着头・捧书",
+          "count": 1,
+          "body": "站",
+          "hands": "其他手部",
+          "face": "平静",
+          "scene": "北校舍・岔路｜校舍间岔路_杂草"
+        },
+        {
+          "pose": "安静地看着我・眼睛亮了一下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "眼睛微弯",
+          "scene": "北校舍・岔路｜旧长椅_午间"
+        },
+        {
+          "pose": "拆糖",
+          "count": 1,
+          "body": "站",
+          "hands": "糖",
+          "face": "平静",
+          "scene": "北校舍・岔路｜旧长椅_午间"
+        },
+        {
+          "pose": "抬眼・抬起头看我",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "抬眼",
+          "scene": "北校舍・岔路｜旧长椅_午间"
+        },
+        {
+          "pose": "膝头放着糖・翻书",
+          "count": 1,
+          "body": "站",
+          "hands": "书",
+          "face": "平静",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_午后"
+        },
+        {
+          "pose": "眼睛微微弯了一下",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "眼睛微弯",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_午后"
+        },
+        {
+          "pose": "眼神里有一丝意外・点头",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "眼睛微弯",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_午后"
+        }
+      ],
+      "summary": {
+        "body": [
+          "站"
+        ],
+        "hands": [
+          "书",
+          "糖",
+          "其他手部"
+        ],
+        "face": [
+          "抬眼",
+          "平静",
+          "微微歪头",
+          "眼睛微弯"
+        ],
+        "needsReview": 0
+      }
+    },
+    "九条院": {
+      "stem": "kujo",
+      "poses": [
+        {
+          "pose": "捧文件・完美微笑",
+          "count": 2,
+          "body": "站",
+          "hands": "文件",
+          "face": "笑",
+          "scene": "教学楼・走廊｜教室_空旷_傍晚"
+        },
+        {
+          "pose": "完美微笑",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "笑",
+          "scene": "教学楼・中庭水龙头旁｜中庭_水龙头"
+        }
+      ],
+      "summary": {
+        "body": [
+          "站"
+        ],
+        "hands": [
+          "文件"
+        ],
+        "face": [
+          "笑"
+        ],
+        "needsReview": 0
+      }
+    },
+    "泽渡": {
+      "stem": "sawtari",
+      "poses": [
+        {
+          "pose": "认真・坐在右端翻纸",
+          "count": 1,
+          "body": "站",
+          "hands": "文件",
+          "face": "脸沉",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_黄昏"
+        },
+        {
+          "pose": "拿起文件袋・走到我面前",
+          "count": 1,
+          "body": "站",
+          "hands": "文件",
+          "face": "笑",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_黄昏"
+        },
+        {
+          "pose": "旧校舍拐角・金丝眼镜",
+          "count": 1,
+          "body": "站",
+          "hands": null,
+          "face": "笑",
+          "scene": "北校舍・旧樱树下・长椅｜旧长椅_黄昏"
+        }
+      ],
+      "summary": {
+        "body": [
+          "站"
+        ],
+        "hands": [
+          "文件"
+        ],
+        "face": [
+          "脸沉",
+          "笑"
+        ],
+        "needsReview": 0
+      }
+    }
+  }
+}

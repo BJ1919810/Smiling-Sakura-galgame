@@ -1,0 +1,905 @@
+{
+  "version": 2,
+  "generatedAt": "2026-09-12T14:19:22.226Z",
+  "note": "每场景节奏清单（台本侧 §14.4 / §16.1）。readSec 按 4.5 字/秒估算，仅作相对比较用。needsBreath = 连续 say > 12 条且中途无 ※/SE 垫场。★ paceNote 由台本侧维护：写入本文件对应 sceneId 后重跑 rhythm 不会丢失（合并保留）。",
+  "totalScenes": 59,
+  "totalReadSec": 6400,
+  "breathAudit": {
+    "threshold": 12,
+    "flagged": 5,
+    "list": [
+      "CH1-SC00",
+      "CH1-SC03",
+      "CH3-SC04",
+      "CH5-SC01",
+      "CH5-SC04"
+    ]
+  },
+  "paceNoteCarried": 26,
+  "scenes": [
+    {
+      "sceneId": "CH1-SC00",
+      "place": "教学楼・二年级教室・早晨",
+      "bg": "教室_早晨",
+      "bgm": [
+        "日常（快）"
+      ],
+      "sayCount": 21,
+      "totalChars": 601,
+      "readSec": 133.55555555555554,
+      "pauses": 0,
+      "seCount": 1,
+      "longestRun": 16,
+      "needsBreath": true
+    },
+    {
+      "sceneId": "CH1-SC01",
+      "place": "教学楼・二年级教室・午休",
+      "bg": "教室_午休_喧闹",
+      "bgm": [
+        "日常（快）"
+      ],
+      "sayCount": 8,
+      "totalChars": 184,
+      "readSec": 40.888888888888886,
+      "pauses": 0,
+      "seCount": 1,
+      "longestRun": 8,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 8（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH1-SC02",
+      "place": "教学楼・走廊 → 北校舍岔路・午休",
+      "bg": "校舍间岔路_杂草",
+      "bgm": [],
+      "sayCount": 6,
+      "totalChars": 206,
+      "readSec": 45.77777777777778,
+      "pauses": 0,
+      "seCount": 1,
+      "longestRun": 6,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH1-SC03",
+      "place": "北校舍・旧樱树下・长椅・午休",
+      "bg": "旧校舍_樱树_长椅",
+      "bgm": [
+        "静・樱",
+        "樱_主题（低）"
+      ],
+      "sayCount": 110,
+      "totalChars": 2139,
+      "readSec": 475.3333333333333,
+      "pauses": 14,
+      "seCount": 2,
+      "longestRun": 14,
+      "needsBreath": true,
+      "paceNote": "[台本侧 R-022修复] 新增 5 拍（踢椅腿／画面静止／镜头拉远／停顿／镜头下压）；真·最长连跑 29→12"
+    },
+    {
+      "sceneId": "CH1-SC04",
+      "place": "操场・下午 第二节（体育课）",
+      "bg": "操场_晴天_大风",
+      "bgm": [
+        "无"
+      ],
+      "sayCount": 16,
+      "totalChars": 422,
+      "readSec": 93.77777777777779,
+      "pauses": 2,
+      "seCount": 1,
+      "longestRun": 8,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022修复] 「※ 静止一拍，BGM 停」的行内 BGM 被编译器忽略，已拆为「※ 静止一拍」；场景头本就是 BGM：无，无需重复停"
+    },
+    {
+      "sceneId": "CH1-SC05",
+      "place": "北校舍・旧樱树下・傍晚",
+      "bg": "旧校舍_傍晚_樱树",
+      "bgm": [
+        "晚风"
+      ],
+      "sayCount": 19,
+      "totalChars": 566,
+      "readSec": 125.77777777777779,
+      "pauses": 3,
+      "seCount": 1,
+      "longestRun": 10,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH2-SC00",
+      "place": "教学楼・二年级教室・第二天・早晨",
+      "bg": "教室_早晨",
+      "bgm": [
+        "日常（快）"
+      ],
+      "sayCount": 19,
+      "totalChars": 411,
+      "readSec": 91.33333333333334,
+      "pauses": 2,
+      "seCount": 1,
+      "longestRun": 10,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH2-SC01",
+      "place": "校舍间小路・第二天・午休",
+      "bg": "校舍间小路_紫藤",
+      "bgm": [
+        "日常"
+      ],
+      "sayCount": 7,
+      "totalChars": 214,
+      "readSec": 47.55555555555556,
+      "pauses": 0,
+      "seCount": 1,
+      "longestRun": 7,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 7（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH2-SC02",
+      "place": "北校舍・旧樱树下・长椅・午休",
+      "bg": "旧校舍_樱树_正午",
+      "bgm": [
+        "静・樱"
+      ],
+      "sayCount": 37,
+      "totalChars": 715,
+      "readSec": 158.88888888888889,
+      "pauses": 4,
+      "seCount": 1,
+      "longestRun": 9,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022修复] 新增 3 拍；真·最长连跑 21→9"
+    },
+    {
+      "sceneId": "CH2-SC03",
+      "place": "北校舍・旧樱树下・长椅・午休",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 32,
+      "totalChars": 853,
+      "readSec": 189.55555555555557,
+      "pauses": 3,
+      "seCount": 1,
+      "longestRun": 9,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022修复] 新增 1 拍；真·最长连跑 13→8"
+    },
+    {
+      "sceneId": "CH2-SC04",
+      "place": "北校舍・旧樱树下・长椅・午休尾",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 19,
+      "totalChars": 367,
+      "readSec": 81.55555555555556,
+      "pauses": 1,
+      "seCount": 0,
+      "longestRun": 10,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022修复] 新增 1 拍（云影爬过操场）；真·最长连跑 17→9"
+    },
+    {
+      "sceneId": "CH2-SC05",
+      "place": "教学楼・二年级教室・放学前后",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 15,
+      "totalChars": 313,
+      "readSec": 69.55555555555556,
+      "pauses": 1,
+      "seCount": 0,
+      "longestRun": 8,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022修复] 新增 1 拍（教室光线暗一档）；真·最长连跑 14→7"
+    },
+    {
+      "sceneId": "CH2-SC06",
+      "place": "教学楼・窗边・放学后",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 4,
+      "totalChars": 152,
+      "readSec": 33.77777777777778,
+      "pauses": 0,
+      "seCount": 0,
+      "longestRun": 4,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH2-SC07",
+      "place": "北校舍・旧樱树下・长椅・傍晚",
+      "bg": "旧校舍_傍晚_长椅",
+      "bgm": [
+        "晚风"
+      ],
+      "sayCount": 10,
+      "totalChars": 233,
+      "readSec": 51.777777777777786,
+      "pauses": 2,
+      "seCount": 0,
+      "longestRun": 5,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH3-SC00",
+      "place": "教学楼・二年级教室・早晨",
+      "bg": "教室_早晨",
+      "bgm": [
+        "日常（快）"
+      ],
+      "sayCount": 12,
+      "totalChars": 249,
+      "readSec": 55.33333333333334,
+      "pauses": 2,
+      "seCount": 0,
+      "longestRun": 7,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH3-SC01",
+      "place": "北校舍・旧樱树下・长椅・午休",
+      "bg": "旧校舍_樱树_正午",
+      "bgm": [
+        "静・樱"
+      ],
+      "sayCount": 53,
+      "totalChars": 1158,
+      "readSec": 257.3333333333333,
+      "pauses": 6,
+      "seCount": 1,
+      "longestRun": 12,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022修复] 新增 2 拍；真·最长连跑 21→12"
+    },
+    {
+      "sceneId": "CH3-SC02",
+      "place": "操场・下午 第二节（体育课）",
+      "bg": "操场_大风",
+      "bgm": [
+        "无",
+        "悬"
+      ],
+      "sayCount": 25,
+      "totalChars": 753,
+      "readSec": 167.33333333333334,
+      "pauses": 3,
+      "seCount": 4,
+      "longestRun": 9,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH3-SC03",
+      "place": "操场・跑道上・体育课",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 13,
+      "totalChars": 378,
+      "readSec": 84,
+      "pauses": 3,
+      "seCount": 1,
+      "longestRun": 5,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH3-SC04",
+      "place": "教学楼・中庭水龙头旁・体育课后",
+      "bg": "中庭_水龙头",
+      "bgm": [
+        "无"
+      ],
+      "sayCount": 42,
+      "totalChars": 851,
+      "readSec": 189.11111111111114,
+      "pauses": 2,
+      "seCount": 2,
+      "longestRun": 13,
+      "needsBreath": true,
+      "paceNote": "[台本侧 R-022修复] 新增 2 拍；另把被编译器忽略的「※ BGM 骤停」改写为「※＋BGM：无」；真·最长连跑 31→11"
+    },
+    {
+      "sceneId": "CH3-SC05",
+      "place": "中庭・同日",
+      "bg": "",
+      "bgm": [
+        "樱_主题（低）"
+      ],
+      "sayCount": 14,
+      "totalChars": 268,
+      "readSec": 59.555555555555564,
+      "pauses": 1,
+      "seCount": 0,
+      "longestRun": 8,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 8（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH3-SC06",
+      "place": "操场・旧长椅・夕阳",
+      "bg": "旧长椅_夕阳",
+      "bgm": [
+        "樱_主题（低）"
+      ],
+      "sayCount": 10,
+      "totalChars": 249,
+      "readSec": 55.33333333333333,
+      "pauses": 2,
+      "seCount": 0,
+      "longestRun": 5,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH4-SC01",
+      "place": "教学楼・二年级教室・第二天・早上",
+      "bg": "教室_早晨",
+      "bgm": [
+        "日常（快）"
+      ],
+      "sayCount": 29,
+      "totalChars": 656,
+      "readSec": 145.77777777777777,
+      "pauses": 2,
+      "seCount": 0,
+      "longestRun": 11,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022修复] 新增 2 拍；真·最长连跑 26→11"
+    },
+    {
+      "sceneId": "CH4-SC02",
+      "place": "北校舍・旧樱树下・长椅・午休",
+      "bg": "旧校舍_樱树_阴天",
+      "bgm": [
+        "静"
+      ],
+      "sayCount": 32,
+      "totalChars": 848,
+      "readSec": 188.44444444444443,
+      "pauses": 1,
+      "seCount": 2,
+      "longestRun": 11,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022修复] 新增 1 拍；真·最长连跑 15→10"
+    },
+    {
+      "sceneId": "CH4-SC03",
+      "place": "教学楼・二年级三班教室・傍晚放学",
+      "bg": "教室_空旷_傍晚",
+      "bgm": [
+        "悬"
+      ],
+      "sayCount": 8,
+      "totalChars": 256,
+      "readSec": 56.888888888888886,
+      "pauses": 2,
+      "seCount": 0,
+      "longestRun": 3,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH4-SC04",
+      "place": "教学楼・走廊・放学后",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 19,
+      "totalChars": 364,
+      "readSec": 80.88888888888889,
+      "pauses": 1,
+      "seCount": 0,
+      "longestRun": 10,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 9（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH4-SC05",
+      "place": "教学楼・走廊・同日",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 2,
+      "totalChars": 38,
+      "readSec": 8.444444444444445,
+      "pauses": 0,
+      "seCount": 0,
+      "longestRun": 2,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH4-SC06",
+      "place": "我的房间・夜",
+      "bg": "房间_书桌_夜",
+      "bgm": [
+        "静"
+      ],
+      "sayCount": 11,
+      "totalChars": 336,
+      "readSec": 74.66666666666666,
+      "pauses": 1,
+      "seCount": 1,
+      "longestRun": 6,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH4-SC07",
+      "place": "北校舍・旧樱树下・长椅・翌日・清晨",
+      "bg": "旧校舍_樱树_清晨",
+      "bgm": [
+        "樱_主题（淡）"
+      ],
+      "sayCount": 12,
+      "totalChars": 324,
+      "readSec": 72,
+      "pauses": 2,
+      "seCount": 0,
+      "longestRun": 10,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH5-SC00",
+      "place": "教学楼・二年级教室・早晨",
+      "bg": "教室_早晨",
+      "bgm": [
+        "日常"
+      ],
+      "sayCount": 10,
+      "totalChars": 215,
+      "readSec": 47.77777777777778,
+      "pauses": 0,
+      "seCount": 0,
+      "longestRun": 10,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH5-SC01",
+      "place": "北校舍・旧樱树下・长椅・周二・午休",
+      "bg": "旧校舍_樱树_正午",
+      "bgm": [
+        "静・樱"
+      ],
+      "sayCount": 60,
+      "totalChars": 1225,
+      "readSec": 272.22222222222223,
+      "pauses": 7,
+      "seCount": 1,
+      "longestRun": 13,
+      "needsBreath": true,
+      "paceNote": "[台本侧 R-022修复] 新增 1 拍；真·最长连跑 13→12"
+    },
+    {
+      "sceneId": "CH5-SC02",
+      "place": "北校舍・旧樱树下・长椅・午休尾",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 15,
+      "totalChars": 296,
+      "readSec": 65.77777777777779,
+      "pauses": 1,
+      "seCount": 1,
+      "longestRun": 8,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 8（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH5-SC03",
+      "place": "教学楼后门・拐角・放学后",
+      "bg": "教学楼后_拐角_傍晚",
+      "bgm": [
+        "悬"
+      ],
+      "sayCount": 19,
+      "totalChars": 637,
+      "readSec": 141.55555555555554,
+      "pauses": 3,
+      "seCount": 1,
+      "longestRun": 11,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH5-SC04",
+      "place": "北校舍・旧樱树下・长椅・放学后",
+      "bg": "旧长椅_夕阳",
+      "bgm": [
+        "樱_主题（低）"
+      ],
+      "sayCount": 33,
+      "totalChars": 752,
+      "readSec": 167.11111111111106,
+      "pauses": 6,
+      "seCount": 0,
+      "longestRun": 13,
+      "needsBreath": true
+    },
+    {
+      "sceneId": "CH5-SC05",
+      "place": "北校舍・旧樱树下・长椅・夕阳西沉",
+      "bg": "",
+      "bgm": [
+        "樱_主题"
+      ],
+      "sayCount": 1,
+      "totalChars": 37,
+      "readSec": 8.222222222222221,
+      "pauses": 1,
+      "seCount": 0,
+      "longestRun": 1,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH6-SC01",
+      "place": "操场・周三・下午两点（体育课）",
+      "bg": "操场_午后",
+      "bgm": [
+        "体育课",
+        "樱_主题（淡）"
+      ],
+      "sayCount": 51,
+      "totalChars": 1440,
+      "readSec": 319.99999999999994,
+      "pauses": 9,
+      "seCount": 2,
+      "longestRun": 10,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022修复] 新增 1 拍；真·最长连跑 13→9"
+    },
+    {
+      "sceneId": "CH6-SC02",
+      "place": "操场・体育课后",
+      "bg": "操场_放学前的间隙",
+      "bgm": [
+        "日常（暖）"
+      ],
+      "sayCount": 31,
+      "totalChars": 911,
+      "readSec": 202.44444444444449,
+      "pauses": 3,
+      "seCount": 0,
+      "longestRun": 12,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 12（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH6-SC03",
+      "place": "教学楼・二年级教室・自习课",
+      "bg": "教室_午后斜阳",
+      "bgm": [
+        "日常"
+      ],
+      "sayCount": 21,
+      "totalChars": 587,
+      "readSec": 130.44444444444443,
+      "pauses": 1,
+      "seCount": 1,
+      "longestRun": 10,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022修复] 新增 1 拍；真·最长连跑 18→10"
+    },
+    {
+      "sceneId": "CH6-SC04",
+      "place": "教学楼・二楼走廊窗边・放学后",
+      "bg": "走廊_窗_黄昏",
+      "bgm": [],
+      "sayCount": 3,
+      "totalChars": 69,
+      "readSec": 15.333333333333334,
+      "pauses": 0,
+      "seCount": 0,
+      "longestRun": 3,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH6-SC05",
+      "place": "北校舍・旧樱树下・长椅・放学后",
+      "bg": "旧长椅_暮色",
+      "bgm": [
+        "樱_主题（淡）"
+      ],
+      "sayCount": 17,
+      "totalChars": 527,
+      "readSec": 117.11111111111107,
+      "pauses": 3,
+      "seCount": 0,
+      "longestRun": 6,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH6-SC06",
+      "place": "北校舍・旧樱树下・长椅・夜",
+      "bg": "",
+      "bgm": [
+        "樱_主题（完整）"
+      ],
+      "sayCount": 1,
+      "totalChars": 43,
+      "readSec": 9.555555555555555,
+      "pauses": 0,
+      "seCount": 0,
+      "longestRun": 1,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH7-SC00",
+      "place": "教学楼・二楼走廊・周四・早晨",
+      "bg": "走廊_午后",
+      "bgm": [
+        "日常"
+      ],
+      "sayCount": 9,
+      "totalChars": 241,
+      "readSec": 53.55555555555556,
+      "pauses": 1,
+      "seCount": 0,
+      "longestRun": 5,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH7-SC01",
+      "place": "教学楼・二年级教室・周四・午休",
+      "bg": "教室_午休",
+      "bgm": [
+        "日常"
+      ],
+      "sayCount": 13,
+      "totalChars": 308,
+      "readSec": 68.44444444444444,
+      "pauses": 1,
+      "seCount": 0,
+      "longestRun": 9,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 9（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH7-SC02",
+      "place": "教学楼・教室门口・午休",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 9,
+      "totalChars": 137,
+      "readSec": 30.444444444444446,
+      "pauses": 1,
+      "seCount": 0,
+      "longestRun": 7,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH7-SC03",
+      "place": "北校舍・岔路・午休",
+      "bg": "校舍间岔路_杂草",
+      "bgm": [
+        "静"
+      ],
+      "sayCount": 10,
+      "totalChars": 297,
+      "readSec": 66,
+      "pauses": 0,
+      "seCount": 0,
+      "longestRun": 10,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 10（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH7-SC04",
+      "place": "北校舍・岔路・午休",
+      "bg": "旧长椅_午间",
+      "bgm": [
+        "樱_主题"
+      ],
+      "sayCount": 39,
+      "totalChars": 1074,
+      "readSec": 238.66666666666669,
+      "pauses": 4,
+      "seCount": 0,
+      "longestRun": 12,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022修复] 新增 2 拍；真·最长连跑 19→10"
+    },
+    {
+      "sceneId": "CH7-SC05",
+      "place": "北校舍・岔路・午休",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 41,
+      "totalChars": 968,
+      "readSec": 215.11111111111111,
+      "pauses": 4,
+      "seCount": 2,
+      "longestRun": 12,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH7-SC06",
+      "place": "教学楼・教室・下午",
+      "bg": "教室_午后",
+      "bgm": [
+        "日常"
+      ],
+      "sayCount": 4,
+      "totalChars": 155,
+      "readSec": 34.44444444444444,
+      "pauses": 0,
+      "seCount": 0,
+      "longestRun": 4,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH7-SC07",
+      "place": "北校舍・旧樱树下・长椅・放学后",
+      "bg": "旧长椅_黄昏",
+      "bgm": [
+        "悬"
+      ],
+      "sayCount": 21,
+      "totalChars": 523,
+      "readSec": 116.22222222222221,
+      "pauses": 1,
+      "seCount": 0,
+      "longestRun": 11,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 11（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH7-SC08",
+      "place": "北校舍・旧樱树下・长椅・入夜前",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 6,
+      "totalChars": 173,
+      "readSec": 38.44444444444444,
+      "pauses": 0,
+      "seCount": 0,
+      "longestRun": 6,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH7-SC09",
+      "place": "我的房间・夜",
+      "bg": "房间_书桌_夜",
+      "bgm": [
+        "樱_主题（淡）"
+      ],
+      "sayCount": 4,
+      "totalChars": 118,
+      "readSec": 26.22222222222222,
+      "pauses": 1,
+      "seCount": 0,
+      "longestRun": 2,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH8-SC00",
+      "place": "教学楼・二年级教室・周五・上午第三节",
+      "bg": "教室_午后",
+      "bgm": [
+        "日常"
+      ],
+      "sayCount": 16,
+      "totalChars": 432,
+      "readSec": 95.99999999999999,
+      "pauses": 2,
+      "seCount": 1,
+      "longestRun": 8,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH8-SC01",
+      "place": "教学楼・二年级教室 → 北校舍・周五・午休",
+      "bg": "校舍间岔路_杂草",
+      "bgm": [
+        "日常"
+      ],
+      "sayCount": 10,
+      "totalChars": 332,
+      "readSec": 73.77777777777777,
+      "pauses": 0,
+      "seCount": 0,
+      "longestRun": 10,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 10（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH8-SC02",
+      "place": "北校舍・旧樱树下・长椅・午休",
+      "bg": "旧长椅_午后",
+      "bgm": [
+        "樱_主题"
+      ],
+      "sayCount": 11,
+      "totalChars": 331,
+      "readSec": 73.55555555555556,
+      "pauses": 1,
+      "seCount": 0,
+      "longestRun": 10,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 10（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH8-SC03",
+      "place": "北校舍・旧樱树下・长椅・午休",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 20,
+      "totalChars": 704,
+      "readSec": 156.4444444444444,
+      "pauses": 3,
+      "seCount": 0,
+      "longestRun": 7,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH8-SC04",
+      "place": "北校舍・旧樱树下・长椅・午休",
+      "bg": "",
+      "bgm": [],
+      "sayCount": 13,
+      "totalChars": 356,
+      "readSec": 79.11111111111111,
+      "pauses": 2,
+      "seCount": 0,
+      "longestRun": 6,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH8-SC05",
+      "place": "教学楼・二年级教室・放学后",
+      "bg": "教室_放学后",
+      "bgm": [
+        "日常（暖）"
+      ],
+      "sayCount": 19,
+      "totalChars": 589,
+      "readSec": 130.88888888888889,
+      "pauses": 2,
+      "seCount": 0,
+      "longestRun": 11,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH8-SC06",
+      "place": "北校舍・旧樱树下・长椅・傍晚",
+      "bg": "旧长椅_黄昏",
+      "bgm": [
+        "悬"
+      ],
+      "sayCount": 24,
+      "totalChars": 725,
+      "readSec": 161.1111111111111,
+      "pauses": 1,
+      "seCount": 1,
+      "longestRun": 10,
+      "needsBreath": false,
+      "paceNote": "[台本侧 R-022] 核验合格，真·最长连跑 7（16.1 旧口径已作废）"
+    },
+    {
+      "sceneId": "CH8-SC07",
+      "place": "北校舍・旧樱树下・长椅・入夜前",
+      "bg": "",
+      "bgm": [
+        "樱_主题（低）"
+      ],
+      "sayCount": 13,
+      "totalChars": 435,
+      "readSec": 96.66666666666666,
+      "pauses": 2,
+      "seCount": 1,
+      "longestRun": 6,
+      "needsBreath": false
+    },
+    {
+      "sceneId": "CH8-SC08",
+      "place": "北校舍・旧长椅・夜",
+      "bg": "",
+      "bgm": [
+        "樱_主题（完整）"
+      ],
+      "sayCount": 3,
+      "totalChars": 61,
+      "readSec": 13.555555555555555,
+      "pauses": 0,
+      "seCount": 0,
+      "longestRun": 3,
+      "needsBreath": false
+    }
+  ]
+}

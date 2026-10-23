@@ -1,0 +1,38 @@
+# ══════════════ 依赖与构建产物 ══════════════
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# ══════════════ 系统与临时 ══════════════
+*.local
+*.log
+.DS_Store
+Thumbs.db
+.shots/
+
+# ══════════════ 敏感信息（云卡 SSH 口令 / 生成图暂存）══════════════
+# 通配以覆盖 .bak-* 之类的手工备份（曾漏一个带 SSH 密码的 .bak）
+tools/cloud-comfy.config.json*
+tools/_cloud_out/
+
+# ══════════════ 素材生产源（约 1 GB，不进仓库）══════════════
+# 运行时所需资源已部署在 public/assets/ 下，此处只是原始素材与生产脚本
+素材基准/
+
+# ══════════════ 弃用资源：立绘体系 ══════════════
+# 立绘整体弃用、画面全靠 BG + CG，assets.manifest.json 中 char 为 0 键。
+# 保留 54 MB 纯死重没有意义；引擎侧已对 meta.json 缺失做兜底。
+public/assets/char/
+
+# ══════════════ 发行包（走 GitHub Releases，不进版本库）══════════════
+*.apk
+*.exe
+*.msi
+*.dmg
+*.app
+
+# ══════════════ 内部工作记录（AI 协作记忆 / 备份 / 临时）══════════════
+# 用「先忽略目录内容、再放行 skills」的写法：直接忽略 .workbuddy/ 会让例外规则失效
+.workbuddy/*
+!.workbuddy/skills/

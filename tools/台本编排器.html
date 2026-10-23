@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>《笑樱》台本编排器</title>
+<!-- 功能集 ｜ 2026-09-15 21:46 ｜ 新增行 / 编译落点徽章 / 舞台预览 / 演出体检 / 行为候选框
+     ⚠️ 本文件**不内嵌版本号**——旧文档里「v2」「v3」两种说法并存且无从考证，
+     今后引用请用「功能集 + 日期」。上一版存档：tools/_存档_台本编排器_仅编辑版_v1.html -->
+<style>
+  :root{
+    --bg:#f5f7fb; --panel:#ffffff; --line:#e5e9f2; --txt:#1f2937; --sub:#6b7280;
+    --blue:#2563eb; --purple:#7c3aed; --green:#059669; --amber:#d97706; --red:#dc2626; --cyan:#0891b2;
+    --badge-bg:#eef2ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);color:var(--txt);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  header{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  header h1{font-size:17px;font-weight:700;color:var(--blue)}
+  header h1 small{color:var(--sub);font-weight:400;font-size:12px;margin-left:6px}
+  button{border:1px solid var(--line);background:var(--panel);color:var(--txt);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;transition:.15s;font-family:inherit}
+  button:hover{border-color:var(--blue);color:var(--blue)}
+  button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+  button.primary:hover{opacity:.9;color:#fff}
+  button.on{background:#eef2ff;border-color:var(--blue);color:var(--blue);font-weight:600}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .sep{width:1px;height:22px;background:var(--line);margin:0 2px}
+  #dirty{font-size:12px;color:var(--amber);font-weight:600;display:none}
+  #stats{font-size:12px;color:var(--sub);margin-left:auto}
+  #toolbar{background:var(--panel);border-bottom:1px solid var(--line);padding:8px 18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .chip{padding:4px 12px;border-radius:999px;border:1px solid var(--line);font-size:12px;cursor:pointer;background:var(--panel);color:var(--sub);user-select:none}
+  .chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
+  .chip.warn.active{background:var(--red);border-color:var(--red);color:#fff}
+  .chip.warn{border-color:#fecaca;color:var(--red)}
+  #search{flex:0 0 200px;padding:6px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none}
+  #search:focus{border-color:var(--blue)}
+  #hint{font-size:11px;color:var(--sub);margin-left:auto}
+  /* ── 主体：列表 + 舞台 ── */
+  #main{flex:1;display:flex;min-height:0}
+  #list{flex:1;overflow-y:auto;padding:14px 18px 80px;min-width:0}
+  aside#stage{flex:0 0 400px;border-left:1px solid var(--line);background:var(--panel);overflow-y:auto;padding:14px;display:none}
+  aside#stage.open{display:block}
+  body.no-stage aside#stage{display:none!important}
+  /* ── 列表行 ── */
+  .chapter-head{margin:18px 0 8px;font-size:15px;font-weight:700;color:var(--purple);border-left:4px solid var(--purple);padding-left:10px}
+  .unit{display:flex;gap:8px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:6px;transition:.12s;position:relative}
+  .unit:hover{border-color:#c7d2fe;box-shadow:0 1px 4px rgba(37,99,235,.08)}
+  .unit.sel{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.15)}
+  .unit.hidden{display:none}
+  .unit.flag{border-left:3px solid var(--red)}
+  .badge{flex:0 0 auto;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;margin-top:2px;background:var(--badge-bg);color:var(--blue);white-space:nowrap}
+  .badge.dialogue{background:#eff6ff;color:var(--blue)}
+  .badge.env{background:#ecfdf5;color:var(--green)}
+  .badge.sprite{background:#f5f3ff;color:var(--purple)}
+  .badge.note{background:#fffbeb;color:var(--amber)}
+  .badge.scene{background:#ecfeff;color:var(--cyan)}
+  .badge.cg{background:#fdf2f8;color:#be185d}
+  .badge.block{background:#f3f4f6;color:var(--sub)}
+  .badge.other{background:#f3f4f6;color:var(--sub)}
+  .unit-body{flex:1;min-width:0;cursor:pointer}
+  .unit-speaker{font-weight:700;color:var(--blue);font-size:13px}
+  .unit-speaker .mk{font-weight:600;color:#c9738c;margin-left:4px;font-size:12px}
+  .unit-text{font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-all;color:var(--txt)}
+  .unit-text.dim{color:var(--sub)}
+  /* 与游戏内排版一致 —— 所见即程序所为（主人 2026-09-15 要求） */
+  .unit-text.k-inner{color:#c9738c;font-style:italic}
+  .unit-text.k-narration{color:#8b8494}
+  .unit-meta{font-size:11px;color:var(--sub);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .unit-meta code{background:#f3f4f6;padding:1px 5px;border-radius:4px;font-size:10.5px}
+  /* 编译落点徽章 */
+  .fx{margin-left:auto;display:flex;gap:5px;align-items:center;flex:0 0 auto;margin-top:2px}
+  .fxtag{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;border:1px solid transparent}
+  .fxtag.push{background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe}
+  .fxtag.camera{background:#e0e7ff;color:#4338ca;border-color:#c7d2fe}
+  .fxtag.fadeOut{background:#e5e7eb;color:#374151;border-color:#d1d5db}
+  .fxtag.dead{background:#fef3c7;color:#92400e;border-color:#fde68a}
+  .fxtag.newfx{background:#dcfce7;color:#15803d;border-color:#bbf7d0}
+  .fxtag.none{background:#fee2e2;color:#b91c1c;border-color:#fecaca}
+  .fxtag.err{background:#fee2e2;color:#b91c1c;border-color:#fca5a5}
+  .unit-ops{flex:0 0 auto;display:none;gap:3px;margin-top:1px}
+  .unit:hover .unit-ops{display:flex}
+  .unit-ops button{padding:1px 7px;font-size:11px;border-radius:6px}
+  .unit-ops .del:hover{border-color:var(--red);color:var(--red)}
+  .unit-ops .ins:hover{border-color:var(--green);color:var(--green);font-weight:700}
+  /* ── dialog 通用 ── */
+  dialog{border:none;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:0;width:min(720px,94vw)}
+  dialog::backdrop{background:rgba(15,23,42,.35)}
+  .dlg-head{padding:14px 20px;border-bottom:1px solid var(--line);font-weight:700;font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .dlg-head span.type{font-size:12px;font-weight:600;padding:2px 10px;border-radius:6px;background:var(--badge-bg);color:var(--blue)}
+  .dlg-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;max-height:70vh;overflow-y:auto}
+  .fld{display:flex;flex-direction:column;gap:4px}
+  .fld label{font-size:12px;color:var(--sub);font-weight:600}
+  .fld input,.fld textarea,.fld select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;outline:none;width:100%;background:#fff;color:var(--txt)}
+  .fld textarea{min-height:110px;resize:vertical;line-height:1.6}
+  .fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--blue)}
+  .fld-row{display:flex;gap:10px}
+  .fld-row .fld{flex:1}
+  .dlg-foot{padding:12px 20px 18px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--line)}
+  pre.mdprev{background:#0f172a;color:#a5f3fc;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.6;overflow-x:auto;white-space:pre-wrap;word-break:break-all;font-family:Consolas,"Courier New",monospace}
+  .warn-strip{background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:12px;border-radius:8px;padding:8px 12px;line-height:1.6}
+  .info-strip{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;font-size:12px;border-radius:8px;padding:8px 12px;line-height:1.6}
+  .err-strip{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;font-size:12px;border-radius:8px;padding:8px 12px;line-height:1.6}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 22px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:80vw;text-align:center}
+  #toast.show{opacity:.95}
+  #fallback{max-width:920px;margin:40px auto;padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:14px;display:none}
+  #restore-banner{background:#ecfdf5;border-bottom:1px solid #a7f3d0;color:#065f46;font-size:13px;padding:9px 18px;display:none;align-items:center;gap:10px}
+  /* ══════════ 舞台 ══════════ */
+  .stage-title{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  #stageBox{position:relative;width:100%;aspect-ratio:16/9;background:#0b1020;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  #stageInner{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;will-change:transform}
+  #stageInner img.bgimg{position:absolute;left:0;top:0;width:1920px;height:1080px;object-fit:cover;user-select:none;-webkit-user-drag:none}
+  #stageInner .actor{position:absolute;transform-origin:50% 100%;user-select:none;-webkit-user-drag:none}
+  #stageFade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+  #stageEmpty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:13px;text-align:center;padding:20px;line-height:1.9}
+  .stage-bar{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .stage-bar button{padding:5px 10px;font-size:12px}
+  .kv{margin-top:10px;font-size:12px;line-height:1.9;color:var(--sub)}
+  .kv b{color:var(--txt);font-weight:600}
+  .kv .miss{color:#d1d5db}
+  .kv .live{color:var(--green);font-weight:600}
+  .kv .dead{color:var(--amber);font-weight:600}
+  .kv .none{color:var(--red);font-weight:600}
+  .spin{font-size:11px;color:var(--sub)}
+  /* ══════════ 体检 ══════════ */
+  .audit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .acard{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .acard .n{font-size:22px;font-weight:800;line-height:1.2}
+  .acard .l{font-size:11px;color:var(--sub);margin-top:2px}
+  .acard.ok .n{color:var(--green)}
+  .acard.dead .n{color:var(--amber)}
+  .acard.none .n{color:var(--red)}
+  .acard.all .n{color:var(--blue)}
+  table.kw{width:100%;border-collapse:collapse;font-size:12px}
+  table.kw th,table.kw td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  table.kw th{background:#f8fafc;font-size:11px;color:var(--sub);font-weight:700}
+  table.kw code{background:#0f172a;color:#a5f3fc;padding:1px 5px;border-radius:4px;font-size:11px}
+  .flist{max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:10px}
+  .frow{display:flex;gap:8px;padding:7px 10px;border-bottom:1px solid var(--line);font-size:12px;cursor:pointer;align-items:flex-start}
+  .frow:last-child{border-bottom:none}
+  .frow:hover{background:#f8fafc}
+  .frow .ln{flex:0 0 46px;color:var(--sub);font-size:11px;padding-top:1px}
+  .frow .tx{flex:1;min-width:0;word-break:break-all;line-height:1.5}
+  .frow .hintx{font-size:11px;color:var(--amber);margin-top:2px}
+  #bigStage{width:min(94vw,1500px)}
+  #bigStageBox{position:relative;width:100%;aspect-ratio:16/9;background:#0b1020;border-radius:10px;overflow:hidden}
+  #bigStageInner{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+  #bigStageInner img.bgimg{position:absolute;left:0;top:0;width:1920px;height:1080px;object-fit:cover}
+  #bigStageInner .actor{position:absolute;transform-origin:50% 100%}
+  #bigStageFade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>《笑樱》台本编排器<small>直接读写台本 md · 右侧舞台＝程序里的真实画面</small></h1>
+  <button id="btnOpen" class="primary">📂 打开台本</button>
+  <button id="btnSave" disabled>💾 保存</button>
+  <button id="btnUndo" disabled>↩️ 撤销</button>
+  <span class="sep"></span>
+  <button id="btnInsert" disabled>＋ 新增行</button>
+  <button id="btnAudit" disabled>🩺 演出体检</button>
+  <button id="btnStage" disabled>🎬 舞台</button>
+  <span id="dirty">● 未保存</span>
+  <span id="stats"></span>
+</header>
+
+<div id="toolbar">
+  <span class="chip active" data-f="all">全部</span>
+  <span class="chip" data-f="dialogue">台词</span>
+  <span class="chip" data-f="env">BG·BGM·SE</span>
+  <span class="chip" data-f="sprite">立绘</span>
+  <span class="chip" data-f="note">※演出</span>
+  <span class="chip" data-f="scene">场景</span>
+  <span class="chip warn" data-f="fxdead" title="映射成功但引擎不做画面动作，或完全不被执行的 ※ 行">⚠ 不生效的演出</span>
+  <input id="search" placeholder="🔍 搜索文本 / 角色 / 素材名…">
+  <span id="hint">点行＝编辑＋右侧看画面 · <b>＋</b>＝在此行下插入 · 结构行/选项块受保护</span>
+</div>
+
+<div id="restore-banner">
+  📄 检测到上次打开的台本：<b id="restoreName">笑樱_galgame台本.md</b>
+  <button id="btnRestore" class="primary">一键恢复</button>
+</div>
+
+<div id="main">
+  <div id="list"></div>
+  <aside id="stage">
+    <div class="stage-title">🎬 舞台预览 <span id="stagePos" class="spin"></span></div>
+    <div id="stageBox">
+      <div id="stageInner"></div>
+      <div id="stageFade"></div>
+      <div id="stageEmpty">点左侧任意一行<br>这里显示<b>程序里那一刻的真实画面</b></div>
+    </div>
+    <div class="stage-bar">
+      <button id="stPlay" disabled>▶ 播放这一行的运镜</button>
+      <button id="stReset" disabled>↺ 复位</button>
+      <button id="stBig" disabled>⤢ 放大</button>
+    </div>
+    <div class="kv" id="stageKv"></div>
+  </aside>
+</div>
+
+<div id="fallback">
+  <h3>当前浏览器不支持 File System Access API</h3>
+  <p style="font-size:13px;color:var(--sub);margin:10px 0">当前环境（如内嵌预览）不允许直接读写本地文件。请用 <b>Chrome / Edge 直接双击打开本 html 文件</b>获得「自动恢复＋直接保存」能力；或在下面选择/粘贴台本内容，编辑后下载覆盖。</p>
+  <input type="file" id="fbFile" accept=".md,.txt">
+  <textarea id="fbText" style="width:100%;height:300px;margin-top:10px;font-size:12px"></textarea>
+  <button id="fbParse" style="margin-top:8px">解析粘贴内容</button>
+  <button id="fbDownload" style="margin-top:8px">下载编辑结果</button>
+</div>
+
+<!-- 编辑单元 -->
+<dialog id="dlg">
+  <div class="dlg-head"><span id="dlgTitle">编辑</span><span class="type" id="dlgType"></span></div>
+  <div class="dlg-body" id="dlgBody"></div>
+  <div class="dlg-foot">
+    <button id="dlgCancel">取消</button>
+    <button id="dlgOk" class="primary">确定</button>
+  </div>
+</dialog>
+
+<!-- 新增单元 -->
+<dialog id="insDlg">
+  <div class="dlg-head"><span>＋ 新增行</span><span class="type" id="insWhere"></span></div>
+  <div class="dlg-body">
+    <div class="fld">
+      <label>类型</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap" id="insTypes">
+        <span class="chip active" data-t="dialogue">台词</span>
+        <span class="chip" data-t="sprite">立绘</span>
+        <span class="chip" data-t="env">BG·BGM·SE</span>
+        <span class="chip" data-t="note">※ 演出</span>
+        <span class="chip" data-t="cg">■ CG</span>
+        <span class="chip" data-t="scene">■ SCENE</span>
+        <span class="chip" data-t="comment">%% 备注</span>
+      </div>
+    </div>
+    <div id="insForm"></div>
+    <div class="fld">
+      <label>将写入台本的内容（编译后即按此演出）</label>
+      <pre class="mdprev" id="insPrev"></pre>
+    </div>
+    <div id="insFxNote"></div>
+  </div>
+  <div class="dlg-foot">
+    <button id="insCancel">取消</button>
+    <button id="insOk" class="primary">插入</button>
+  </div>
+</dialog>
+
+<!-- 演出体检 -->
+<dialog id="auditDlg">
+  <div class="dlg-head"><span>🩺 演出体检 —— ※ 行在程序里到底会做什么</span></div>
+  <div class="dlg-body" id="auditBody"></div>
+  <div class="dlg-foot"><button id="auditClose" class="primary">知道了</button></div>
+</dialog>
+
+<!-- 放大舞台 -->
+<dialog id="bigStage">
+  <div class="dlg-head"><span>🎬 舞台 · 大图</span><span class="type" id="bigStagePos"></span></div>
+  <div class="dlg-body" style="padding:14px 20px">
+    <div id="bigStageBox">
+      <div id="bigStageInner"></div>
+      <div id="bigStageFade"></div>
+    </div>
+    <div class="stage-bar">
+      <button id="bgPlay" class="primary">▶ 播放运镜</button>
+      <button id="bgReset">↺ 复位</button>
+    </div>
+    <div class="kv" id="bigStageKv"></div>
+  </div>
+  <div class="dlg-foot"><button id="bigClose">关闭</button></div>
+</dialog>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   一、常量 —— 全部与引擎/编译器对齐，改动须同步改这里
+   ============================================================ */
+
+/** 台本角色名 → 素材 stem（src/render/Layers.ts STEMS） */
+const STEMS = { 龙司:'ryuji', 樱:'sakura', 阳太:'yota', 亚里沙:'arisa', 九条院:'kujo', 泽渡:'sawtari' };
+/** 台本角色名 → 姓名框**实际显示**的全名（src/director/Director.ts CHAR_FULL_NAME） */
+const FULLNAME = { 樱:'篠宫樱', 龙司:'芥川龙司', 阳太:'木下阳太', 亚里沙:'高梨亚里沙', 九条院:'九条院丽华', 泽渡:'泽渡拓真' };
+
+/**
+ * 台词的三种性质 —— 决定姓名框与排版（src/engine/script/ops.ts SayKind）
+ * ⚠️ 这些视觉差异在台本里**看不出来**，所以在这里就地标明（主人 2026-09-15 要求）
+ */
+const KIND = {
+  inner:     { label:'心声', desc:'无姓名框 · 斜体 · 樱粉 #e8a0b4（不发声）' },
+  narration: { label:'叙述', desc:'无姓名框 · 正文降明度 #b8b2c4（第一人称地の文）' },
+  speech:    { label:'台词', desc:'显示姓名框（自动补全名，见下）' },
+};
+/** 立绘图片原始尺寸（每个 stem 内各差分一致，取自 public/assets/char/） */
+const CHAR_IMG = { sakura:[729,2413], ryuji:[603,2409], yota:[805,2449], arisa:[987,2429], kujo:[885,2540], sawtari:[733,2414] };
+/** 基础图 alpha 顶偏移（public/assets/char/meta.json） */
+const BASE_TOP = { sakura:0, ryuji:0, yota:0, arisa:4, kujo:121, sawtari:2 };
+/** 设计舞台（src/render/Stage.ts） */
+const STAGE_W = 1920, STAGE_H = 1080;
+/** 立绘地面线（Layers.ts SPRITE_GROUND）与头顶落点 */
+const GROUND = 2550;
+const HEAD_Y_FEMALE = 410, HEAD_Y_MALE = 210;
+const FEMALE = new Set(['樱','亚里沙','九条院']);
+/** 站位 → x 比例（PlaceholderFactory.ts SLOT_RATIO） */
+const SLOT_RATIO = {
+  '长椅左端':0.3,'长椅':0.42,'长椅中央':0.42,'长椅右端':0.56,'长椅右外侧':0.66,'长椅右侧':0.6,
+  '左':0.24,'左端':0.18,'右':0.76,'右端':0.82,'画面右侧':0.8,'画面左侧':0.2,'中央':0.5,'center':0.5,
+  '走廊左':0.26,'走廊右':0.74,'站立':0.5,
+  '看台左':0.24,'看台右':0.76,'看台第三排':0.5,
+  '操场边线外':0.16,'操场对面':0.62,'操场':0.5,
+};
+const slotRatio = s => (s && SLOT_RATIO[s] != null) ? SLOT_RATIO[s] : 0.5;
+const onRight   = s => slotRatio(s) > 0.5;
+
+/** 素材表（由 src/generated/assets.manifest.json 导出；素材有变时重新同步） */
+const ASSETS = {
+  bg: {"教室_早晨":"bg/bg_001.png","教室_午休_喧闹":"bg/bg_001.png","走廊_午后":"bg/bg_002.png","校舍间岔路_杂草":"bg/bg_024.png","旧校舍_樱树_长椅":"bg/bg_025.png","操场_晴天_大风":"bg/bg_006.png","旧校舍_傍晚_樱树":"bg/bg_025.png","校舍间小路_紫藤":"bg/bg_024.png","旧校舍_樱树_正午":"bg/bg_025.png","旧校舍_傍晚_长椅":"bg/bg_025.png","操场_大风":"bg/bg_006.png","中庭_水龙头":"bg/bg_026.png","旧长椅_夕阳":"bg/bg_025.png","旧校舍_樱树_阴天":"bg/bg_025.png","教室_空旷_傍晚":"bg/bg_001.png","房间_书桌_夜":"bg/bg_002.png","旧校舍_樱树_清晨":"bg/bg_025.png","教学楼后_拐角_傍晚":"bg/bg_002.png","操场_午后":"bg/bg_006.png","操场_放学前的间隙":"bg/bg_006.png","教室_午后斜阳":"bg/bg_001.png","走廊_窗_黄昏":"bg/bg_002.png","旧长椅_暮色":"bg/bg_025.png","教室_午休":"bg/bg_001.png","旧长椅_午间":"bg/bg_025.png","教室_午后":"bg/bg_001.png","旧长椅_黄昏":"bg/bg_025.png","旧长椅_午后":"bg/bg_025.png","教室_放学后":"bg/bg_001.png"},
+  bgm: {"日常（快）":"bgm/bgm_001.ogg","静・樱":"bgm/bgm_002.ogg","樱_主题（低）":"bgm/bgm_003.ogg","无":"bgm/bgm_004.ogg","晚风":"bgm/bgm_005.ogg","日常":"bgm/bgm_006.ogg","悬":"bgm/bgm_007.ogg","静":"bgm/bgm_008.ogg","樱_主题（淡）":"bgm/bgm_009.ogg","樱_主题":"bgm/bgm_010.ogg","体育课":"bgm/bgm_011.ogg","日常（暖）":"bgm/bgm_012.ogg","樱_主题（完整）":"bgm/bgm_013.ogg"},
+  se: {"上课预备铃":"se/se_001.ogg","教室嘈杂":"se/se_002.ogg","脚步声":"se/se_003.ogg","风声":"se/se_004.ogg"},
+  cg: {"长椅默读":"cg/cg_001.png","长椅初识":"cg/cg_002.png","樱摔倒_俯视跑道":"cg/cg_003.png","樱摔倒_阴影蜷坐":"cg/cg_004.png"}
+};
+/** 素材根（相对 tools/台本编排器.html） */
+const ASSET_BASE = '../public/assets/';
+
+/* ============================================================
+   二、※ 行 → 程序里实际发生什么
+   —— 与 tools/compiler/parser.ts starToFx() 逐字对齐，改动须同步
+   ============================================================ */
+const FX = {
+  push:   { type:'push',    cls:'push',    tag:'推镜 6%',      live:true,
+            desc:'画面整体放大 6%（特写感）', kw:'必须以「特写」二字开头' },
+  camera: { type:'camera',  cls:'camera',  tag:'镜头 3.5%',    live:true,
+            desc:'画面轻推放大 3.5%',         kw:'必须以「镜头」「远景」或「镜头切」开头' },
+  fadeOut:{ type:'fadeOut', cls:'fadeOut', tag:'黑场 1.4s',    live:true,
+            desc:'渐入黑场，全篇仅此一处',     kw:'文中含「FADE OUT」' },
+  hop:    { type:'hop',     cls:'newfx',   tag:'雀跃',         live:true,
+            desc:'立绘向上跳一下（120px / 500ms，抛物线）', kw:'含「雀跃」；写「雀跃：樱」可只跳指定角色' },
+  flash:  { type:'flash',   cls:'newfx',   tag:'白闪',         live:true,
+            desc:'画面白闪一次（柚子社式）',   kw:'含「白闪」' },
+  petalDense: { type:'petalDense', cls:'newfx', tag:'花瓣密',  live:true,
+            desc:'花瓣粒子加到 64 粒（原「樱」场景的效果）', kw:'含「花瓣密」' },
+  petalSparse:{ type:'petalSparse', cls:'newfx', tag:'花瓣疏', live:true,
+            desc:'花瓣粒子回默认 24 粒',       kw:'含「花瓣疏」' },
+  petalStop:  { type:'petalStop',   cls:'newfx', tag:'花瓣停', live:true,
+            desc:'花瓣粒子关闭',               kw:'含「花瓣停」或「花瓣无」' },
+  beat:   { type:'beat',    cls:'dead',    tag:'节拍·无动作',  live:false, dead:true,
+            desc:'映射成功，但引擎是空实现 —— 画面完全不动', kw:'含「沉默/静默/静止/停留/隔了三秒/时间流逝」' },
+  blur:   { type:'blur',    cls:'dead',    tag:'慢镜·未实现',  live:false, dead:true,
+            desc:'待 PixiJS 滤镜，本期不做 —— 画面不动',      kw:'含「慢镜」' },
+  note:   { type:'note',    cls:'none',    tag:'不执行',       live:false,
+            desc:'程序完全忽略，等于写在台本里的注释',          kw:'以上关键词一个都没踩中（写备注请用 %% 前缀）' },
+};
+
+/**
+ * ※ 行的「行为候选」—— 拿这里选，别靠记忆猜关键词（主人 2026-09-15 要求）
+ * tpl＝选它之后自动填进文本的模板；选完仍可自由编辑。
+ */
+const FX_PRESETS = [
+  { key:'push',        label:'🎬 推镜 6%（特写）',      tpl:'特写：' },
+  { key:'camera',      label:'🎥 镜头 3.5%（轻推）',    tpl:'镜头' },
+  { key:'fadeOut',     label:'⬛ 黑场 1.4s',            tpl:'FADE OUT' },
+  { key:'hop',         label:'🐰 雀跃（立绘跳一下）',    tpl:'雀跃' },
+  { key:'flash',       label:'⚪ 白闪',                 tpl:'白闪' },
+  { key:'petalDense',  label:'🌸 花瓣密（64 粒）',      tpl:'花瓣密' },
+  { key:'petalSparse', label:'🍃 花瓣疏（回 24 粒）',   tpl:'花瓣疏' },
+  { key:'petalStop',   label:'⭕ 花瓣停（关掉）',        tpl:'花瓣停' },
+  { key:'beat',        label:'⏸ 节拍（画面不动）',      tpl:'停顿一拍' },
+  { key:'note',        label:'📝 纯备注（程序不执行）',  tpl:'' },
+];
+
+/**
+ * 体检表用：「必须怎么写」（改白名单时一并更新；顺序＝ starToFx 的判定顺序）
+ */
+const KW_TABLE = [
+  { fx: FX.push,        how: '以 <code>特写</code> 二字<b>开头</b>' },
+  { fx: FX.camera,      how: '以 <code>镜头</code>／<code>远景</code>／<code>镜头切</code> <b>开头</b>' },
+  { fx: FX.fadeOut,     how: '文中含 <code>FADE OUT</code>' },
+  { fx: FX.hop,         how: '含 <code>雀跃</code>（可写「雀跃：樱」只跳指定角色）' },
+  { fx: FX.flash,       how: '含 <code>白闪</code>' },
+  { fx: FX.petalDense,  how: '含 <code>花瓣密</code>' },
+  { fx: FX.petalSparse, how: '含 <code>花瓣疏</code>' },
+  { fx: FX.petalStop,   how: '含 <code>花瓣停</code>／<code>花瓣无</code>' },
+  { fx: FX.beat,        how: '含 <code>沉默</code>／<code>静默</code>／<code>静止</code>／<code>停留</code>／<code>隔了三秒</code>／<code>时间流逝</code>' },
+  { fx: FX.blur,        how: '含 <code>慢镜</code>' },
+];
+
+/**
+ * 复刻 parser.ts 的 starToFx —— ⚠️ 两处必须逐字同步！
+ * 判定顺序敏感；新增判定一律**追加在既有判定之后**（否则会改旧台本的落点）。
+ */
+function starToFx(t){
+  if (/FADE\s*OUT/i.test(t)) return FX.fadeOut;
+  if (t.startsWith('特写')) return FX.push;
+  if (t.startsWith('镜头') || t.startsWith('远景') || t.startsWith('镜头切')) return FX.camera;
+  if (t.includes('慢镜')) return FX.blur;
+  if (/(沉默|静默|静止|停留|静止一拍|隔了三秒|时间流逝)/.test(t)) return FX.beat;
+  // ── 原「引擎自动」效果，2026-09-15 收编为显式指令 ──
+  if (t.includes('花瓣停') || t.includes('花瓣无')) return FX.petalStop;
+  if (t.includes('花瓣密')) return FX.petalDense;
+  if (t.includes('花瓣疏')) return FX.petalSparse;
+  if (t.includes('白闪')) return FX.flash;
+  if (t.includes('雀跃')) return FX.hop;
+  return FX.note;
+}
+
+/** 拆解 ※ 行的正文：切出内嵌 SE、检出非法 BGM 指示（同 parser.ts） */
+function parseStarRaw(raw){
+  let body = raw.replace(/^`\s*※\s*/, '').replace(/`\s*$/, '').trim();
+  let se = null, bgmErr = null;
+  const seM = /SE：([^　]+)/.exec(body);
+  if (seM){ se = seM[1].trim(); body = body.replace(seM[0], '').trim(); }
+  const bgmM = /BGM\s*(?:转为|变|停|渐强|起)?[^　]*/.exec(body);
+  if (bgmM && /BGM/.test(body) && !/BGM：/.test(body)){
+    bgmErr = bgmM[0].trim();
+    body = body.replace(bgmM[0], '').trim();
+  }
+  return { body, se, bgmErr };
+}
+
+/** 括注 → 立绘差分序号（Layers.ts poseToFace，顺序敏感） */
+function poseToFace(pose){
+  if (/眼眶热|含泪/.test(pose)) return 5;
+  if (/眼睛微亮|眼神|极细微/.test(pose)) return 2;
+  if (/微弯|弯/.test(pose)) return 1;
+  if (/歪头/.test(pose)) return 4;
+  if (/抬眼|抬头/.test(pose)) return 3;
+  return 0;
+}
+/** 角色 + 括注 → 实际会加载的立绘文件（缺差分时引擎回退基础图） */
+function spriteFile(char, pose){
+  const stem = STEMS[char];
+  if (!stem) return null;
+  const idx = poseToFace(pose || '');
+  return idx > 0 ? stem + '_' + String(idx).padStart(2,'0') + '.png' : stem + '.png';
+}
+
+/* ============================================================
+   三、状态
+   ============================================================ */
+let rawLines = [];        // string[] 原文所有行
+let units = [];           // 解析出的可编辑单元（含 stageBefore 画面快照）
+let fileHandle = null, dirty = false, undoStack = [], curFilter = 'all', curSearch = '';
+let selIdx = -1;          // 当前选中行（舞台跟随）
+let fbMode = false, httpMode = false;
+const $ = id => document.getElementById(id);
+
+/* ============================================================
+   四、解析
+   ============================================================ */
+const PROTECTED = /^(#{1,2} |```|---|\| |◆|〔|▸|▲|%%|> )/;
+
+function classify(i){
+  const L = rawLines[i];
+  if (/^#\s*第\s*.+\s*[章幕]/.test(L)) return 'chapter';
+  if (/^`■\s*SCENE/.test(L)) return 'scene';
+  if (/^`■\s*立绘/.test(L)) return 'sprite';
+  if (/^`■\s*CG/.test(L)) return 'cg';
+  if (/^`(BG|BGM|SE)：/.test(L)) return 'env';
+  if (/^`※/.test(L)) return 'note';
+  if (/^【.+】/.test(L)) return 'dialogue-head';
+  if (PROTECTED.test(L)) return 'protected';
+  return 'plain';
+}
+
+/** 空画面快照 */
+const emptyStage = () => ({ bg:null, bgm:null, cg:null, sprites:{} });
+
+function parse(){
+  units = [];
+  let i = 0, n = rawLines.length, curChapter = '';
+  const st = emptyStage();
+
+  while (i < n){
+    const L = rawLines[i];
+    if (L.trim() === ''){ i++; continue; }
+    const t = classify(i);
+    const before = { bg:st.bg, bgm:st.bgm, cg:st.cg, sprites:{ ...st.sprites } };
+
+    if (t === 'chapter'){
+      curChapter = L.replace(/^#+\s*/,'');
+      units.push({ start:i, end:i, type:'chapter', title:curChapter, st:before });
+      i++; continue;
+    }
+    if (t === 'scene'){
+      units.push({ start:i, end:i, type:'scene', raw:L.replace(/^`|`$/g,''), st:before });
+      i++; continue;
+    }
+    if (t === 'sprite'){
+      const inner = L.replace(/^`|`$/g,'').replace(/^■\s*立绘：/,'');
+      const m = inner.match(/^([^（｜]+?)(?:（([^）]*)）)?(?:｜(.+))?$/);
+      const char = (m[1]||'').trim(), detail = (m[2]||'').trim(), pos = (m[3]||'').trim();
+      units.push({ start:i, end:i, type:'sprite', char, detail, pos, st:before });
+      if (STEMS[char]) st.sprites[char] = { pose:detail, slot:pos || '中央' };
+      i++; continue;
+    }
+    if (t === 'cg'){
+      const inner = L.replace(/^`|`$/g,'').replace(/^■\s*CG：/,'');
+      units.push({ start:i, end:i, type:'cg', raw:inner, st:before });
+      st.cg = inner.split(/[｜　]/)[0].trim();
+      i++; continue;
+    }
+    if (t === 'env'){
+      const raw = L.replace(/^`|`$/g,'');
+      units.push({ start:i, end:i, type:'env', raw, st:before });
+      raw.split(/　+/).forEach(part => {
+        const m = part.match(/^(BG|BGM|SE)：(.*)$/);
+        if (!m) return;
+        const v = m[2].trim();
+        if (m[1] === 'BG'  && v && !/^(同前|不变)/.test(v)) st.bg = v;
+        if (m[1] === 'BGM') st.bgm = (/^无$/.test(v) ? null : v);
+      });
+      i++; continue;
+    }
+    if (t === 'note'){
+      // 保留原文，编译落点在渲染时实时判定
+      const parsed = parseStarRaw(L);
+      const fx = parsed.body ? starToFx(parsed.body) : null;
+      units.push({ start:i, end:i, type:'note', raw:L, text:parsed.body, se:parsed.se,
+                   bgmErr:parsed.bgmErr, fx, st:before });
+      i++; continue;
+    }
+    if (t === 'dialogue-head'){
+      // ⚠️ 必须连「（心声）」一起解析出来 —— 旧版用 /^(【.+?】)/ 只取前半截，
+      //    把 kind 标记整个吞掉，导致「台本上看不出这句会变粉」（主人 2026-09-15 抓到）
+      const hm = L.match(/^(【.+?】)(.*)$/);
+      const speaker = hm ? hm[1] : L;
+      const marker = (hm && hm[2] ? hm[2] : '').trim();
+      let j = i + 1, buf = [];
+      while (j < n && rawLines[j].trim() !== '' && classify(j) === 'plain'){
+        buf.push(rawLines[j]); j++;
+      }
+      const name = speaker.replace(/[【】]/g,'');
+      const kind = /（心声）/.test(marker) ? 'inner' : (name === '我' ? 'narration' : 'speech');
+      units.push({ start:i, end:j-1, type:'dialogue', speaker, marker, kind, name,
+                   text:buf.join('\n'), chapter:curChapter, st:before });
+      i = j; continue;
+    }
+    if (t === 'protected'){
+      units.push({ start:i, end:i, type:'block', raw:L, st:before }); i++; continue;
+    }
+    units.push({ start:i, end:i, type:'other', raw:L, st:before }); i++;
+  }
+  // 补：把「上一行结束后的画面」记到最后
+  units.forEach(u => { u.__stDone = true; });
+}
+
+/* ============================================================
+   五、工具
+   ============================================================ */
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+function snapshot(){
+  undoStack.push(JSON.stringify(rawLines));
+  if (undoStack.length > 50) undoStack.shift();
+  $('btnUndo').disabled = false;
+}
+function markDirty(){
+  dirty = true;
+  $('dirty').style.display = 'inline';
+  $('btnSave').disabled = !fileHandle && !fbMode && !httpMode;
+}
+function rebuild(){ parse(); render(); syncStage(); }
+function badgeOf(u){
+  switch(u.type){
+    case 'dialogue': return ['dialogue', u.kind === 'inner' ? u.name + '·心声' : u.name];
+    case 'env':      return ['env','BG·BGM·SE'];
+    case 'sprite':   return ['sprite','立绘'];
+    case 'note':     return ['note','※演出'];
+    case 'scene':    return ['scene','场景'];
+    case 'cg':       return ['cg','CG'];
+    case 'chapter':  return ['other','章节'];
+    case 'block':    return ['block','结构'];
+    default:         return ['other','其他'];
+  }
+}
+function previewOf(u){
+  if (u.type === 'dialogue') return u.speaker + ' ' + (u.text.slice(0,40) || '');
+  if (u.type === 'sprite')   return `${u.char}（${u.detail}）${u.pos?'｜'+u.pos:''}`;
+  if (u.type === 'note')     return '※ ' + (u.text||'').slice(0,40);
+  return ((u.raw||'')).slice(0,50);
+}
+
+/* ============================================================
+   六、列表渲染
+   ============================================================ */
+const listEl = $('list');
+
+function fxTagHtml(u){
+  if (u.type !== 'note') return '';
+  let html = '';
+  if (u.bgmErr) html += `<span class="fxtag err" title="编译期 ERROR：※ 行内不能写 BGM 指示">BGM 非法</span>`;
+  if (u.se)     html += `<span class="fxtag fadeOut" title="这一行会额外触发音效：${esc(u.se)}">SE：${esc(u.se)}</span>`;
+  if (u.fx){
+    const detail = `${u.fx.tag} —— ${u.fx.desc}\n触发条件：${u.fx.kw}`;
+    html += `<span class="fxtag ${u.fx.cls}" title="${esc(detail)}">${u.fx.live ? '' : '⚠ '}${u.fx.tag}</span>`;
+  }
+  return html ? `<span class="fx">${html}</span>` : '';
+}
+
+function unitHtml(u, idx){
+  const [cls, label] = badgeOf(u);
+  let body = '', meta = '';
+
+  if (u.type === 'dialogue'){
+    const k = KIND[u.kind] || KIND.speech;
+    const cls = u.kind === 'inner' ? ' k-inner' : (u.kind === 'narration' ? ' k-narration' : '');
+    const nameNote = (u.kind === 'speech' && FULLNAME[u.name]) ? FULLNAME[u.name] : '';
+    body = `<div class="unit-speaker">${esc(u.speaker)}${u.marker ? `<span class="mk">${esc(u.marker)}</span>` : ''}</div>`
+         + `<div class="unit-text${cls}">${esc(u.text)}</div>`;
+    meta = `<div class="unit-meta">程序里：${esc(k.desc)}`
+         + (nameNote ? ` · 姓名框显示「${esc(nameNote)}」` : '') + `</div>`;
+  } else if (u.type === 'env'){
+    body = `<div class="unit-text"><code>${esc(u.raw)}</code></div>`;
+  } else if (u.type === 'sprite'){
+    const f = spriteFile(u.char, u.detail);
+    body = `<div class="unit-text"><b style="color:var(--purple)">${esc(u.char)}</b>（${esc(u.detail)}）${u.pos ? '｜'+esc(u.pos) : ''}</div>`;
+    meta = f
+      ? `<div class="unit-meta">实际取图 <code>char/${esc(f)}</code> · 站位 x=${(slotRatio(u.pos||'中央')*100).toFixed(0)}%${onRight(u.pos||'中央') ? ' · 镜像朝左' : ' · 朝右'}</div>`
+      : `<div class="unit-meta" style="color:var(--red)">角色不在 STEMS 表 → 程序里不会出图</div>`;
+    // ★ 2026-09-15：括注不再自动触发雀跃，但在这里**提醒**（原来自动跳的地方一眼可辨）
+    const nextL = rawLines[u.end + 1] || '';
+    if (/亮|睁大|瞪大|眼睛.{0,4}弯|弯.{0,4}眼|意外|惊|嬉|兴奋|激动|欢呼|惊喜/.test(u.detail || '') && !nextL.includes('雀跃')){
+      meta += `<div class="unit-meta" style="color:var(--amber)">⚠ 括注含高情绪词 —— 旧版会自动跳，现在要另起一行写「※ 雀跃」才会跳</div>`;
+    }
+  } else if (u.type === 'note'){
+    body = `<div class="unit-text dim">※ ${esc(u.text)}</div>`;
+    if (u.fx && !u.fx.live){
+      const how = u.fx === FX.note
+        ? '这条在程序里<b>完全不会执行</b>'
+        : `映射到了 <b>${u.fx.type}</b>，但引擎对该类型是<b>空实现</b>`;
+      meta = `<div class="unit-meta" style="color:${u.fx === FX.note ? 'var(--red)' : 'var(--amber)'}">${how} —— ${esc(u.fx.kw)}</div>`;
+    }
+  } else if (u.type === 'scene'){
+    body = `<div class="unit-text"><code>${esc(u.raw)}</code></div>`;
+  } else if (u.type === 'cg'){
+    body = `<div class="unit-text"><b style="color:#be185d">CG</b> ${esc(u.raw)}</div>`;
+    const f = ASSETS.cg[u.raw.split(/[｜　]/)[0].trim()];
+    meta = `<div class="unit-meta">${f ? '实际取图 <code>'+esc(f)+'</code>' : '<span style="color:var(--amber)">素材表里没有这个 CG key</span>'}</div>`;
+  } else if (u.type === 'chapter'){
+    return `<div class="chapter-head" data-idx="${idx}">${esc(u.title)}</div>`;
+  } else {
+    body = `<div class="unit-text dim"><code>${esc((u.raw||'').slice(0,160))}</code></div>`;
+  }
+
+  const editable = ['dialogue','env','sprite','note','cg'].includes(u.type);
+  const ops = editable
+    ? `<button data-a="ins" class="ins" title="在此行下方插入新行">＋</button>` +
+      `<button data-a="up" title="上移">↑</button><button data-a="down" title="下移">↓</button>` +
+      `<button data-a="del" class="del" title="删除">✕</button>`
+    : `<button data-a="ins" class="ins" title="在此行下方插入新行">＋</button>`;
+
+  const flag = (u.type === 'note' && u.fx && !u.fx.live) ? ' flag' : '';
+  const sel  = idx === selIdx ? ' sel' : '';
+  return `<div class="unit t-${cls}${flag}${sel}" data-idx="${idx}">`
+       + `<span class="badge ${cls}">${label}</span>`
+       + `<div class="unit-body">${body}${meta}</div>`
+       + `${fxTagHtml(u)}<div class="unit-ops">${ops}</div></div>`;
+}
+
+function matches(u){
+  if (curFilter === 'fxdead'){
+    if (u.type !== 'note') return false;
+    return !!(u.fx && !u.fx.live) || !!u.bgmErr;
+  }
+  if (curFilter !== 'all' && u.type !== curFilter) return false;
+  if (curSearch){
+    const hay = JSON.stringify(u).toLowerCase();
+    if (!hay.includes(curSearch.toLowerCase())) return false;
+  }
+  return true;
+}
+
+function render(){
+  const frag = [];
+  let shown = 0;
+  const counts = {};
+  units.forEach((u, idx) => {
+    counts[u.type] = (counts[u.type]||0)+1;
+    if (!matches(u)) return;
+    frag.push(unitHtml(u, idx));
+    shown++;
+  });
+  listEl.innerHTML = frag.join('');
+  const deadN = units.filter(u => u.type==='note' && u.fx && !u.fx.live).length;
+  $('stats').textContent =
+    `台词 ${counts.dialogue||0} ｜ 环境 ${counts.env||0} ｜ 立绘 ${counts.sprite||0} ｜ 演出 ${counts.note||0}`
+    + `（其中 ${deadN} 条程序不执行）｜ 共 ${units.length} 单元（显示 ${shown}）`;
+}
+function applyFilter(){
+  document.querySelectorAll('#toolbar .chip').forEach(c => c.classList.toggle('active', c.dataset.f === curFilter));
+  render();
+}
+
+/* ============================================================
+   七、舞台 —— 复刻引擎摆位
+   ============================================================ */
+let stageOpen = false;
+
+/** 依据「该行进入时的画面快照」渲染舞台 */
+function paintStage(innerEl, fadeEl, st){
+  innerEl.innerHTML = '';
+  fadeEl.style.opacity = 0;
+
+  // CG 优先覆盖全屏
+  if (st.cg && ASSETS.cg[st.cg]){
+    innerEl.innerHTML = `<img class="bgimg" src="${ASSET_BASE + ASSETS.cg[st.cg]}" alt="">`;
+  } else if (st.bg && ASSETS.bg[st.bg]){
+    innerEl.innerHTML = `<img class="bgimg" src="${ASSET_BASE + ASSETS.bg[st.bg]}" alt="">`;
+  } else {
+    innerEl.innerHTML = `<div style="position:absolute;inset:0;background:linear-gradient(160deg,#1e293b,#0f172a)"></div>`;
+  }
+
+  // 立绘
+  Object.entries(st.sprites).forEach(([char, info]) => {
+    const stem = STEMS[char];
+    if (!stem) return;
+    const size = CHAR_IMG[stem];
+    if (!size) return;
+    const [iw, ih] = size;
+    const headY = FEMALE.has(char) ? HEAD_Y_FEMALE : HEAD_Y_MALE;
+    const visibleH = ih - (BASE_TOP[stem] || 0);
+    const s = (GROUND - headY) / visibleH;
+    const x = slotRatio(info.slot) * STAGE_W;
+    const top = GROUND - ih * s;
+    const file = spriteFile(char, info.pose);
+    const flip = onRight(info.slot) ? -1 : 1;
+    const img = document.createElement('img');
+    img.className = 'actor';
+    img.src = ASSET_BASE + 'char/' + file;
+    img.alt = char;
+    img.style.width  = (iw * s) + 'px';
+    img.style.height = (ih * s) + 'px';
+    img.style.left   = (x - iw * s / 2) + 'px';
+    img.style.top    = top + 'px';
+    img.style.transform = 'scaleX(' + flip + ')';
+    img.onerror = () => { img.style.outline = '2px dashed #ef4444'; };
+    innerEl.appendChild(img);
+  });
+
+  fitStage(innerEl);
+}
+
+/** 舞台内容自适应容器宽（1920 设计宽 → 容器实际宽） */
+function fitStage(innerEl){
+  const box = innerEl.parentElement;
+  const w = box.clientWidth || 400;
+  const s = w / STAGE_W;
+  innerEl.style.transform = 'scale(' + s + ')';
+  innerEl.dataset.baseScale = s;
+}
+
+/** 播放 fx —— 与 Director.applyFx 同参（push 0.06 / camera 0.035 / fadeOut 1400ms） */
+function playFx(innerEl, fadeEl, fx, onDone){
+  const base = parseFloat(innerEl.dataset.baseScale || '1');
+  innerEl.style.transition = 'none';
+  innerEl.style.transform = 'scale(' + base + ')';
+  fadeEl.style.transition = 'none';
+  fadeEl.style.opacity = 0;
+  if (!fx || !fx.live){ if (onDone) onDone(); return; }
+  requestAnimationFrame(() => {
+    if (fx.type === 'push' || fx.type === 'camera'){
+      const k = fx.type === 'push' ? 1.06 : 1.035;
+      innerEl.style.transition = 'transform 900ms cubic-bezier(.2,.75,.3,1)';
+      innerEl.style.transform = 'scale(' + (base * k) + ')';
+    } else if (fx.type === 'fadeOut'){
+      fadeEl.style.transition = 'opacity 1400ms ease-in';
+      fadeEl.style.opacity = 1;
+    }
+  });
+  if (onDone) setTimeout(onDone, 1500);
+}
+function resetFx(innerEl, fadeEl){
+  const base = parseFloat(innerEl.dataset.baseScale || '1');
+  innerEl.style.transition = 'transform 400ms ease';
+  innerEl.style.transform = 'scale(' + base + ')';
+  fadeEl.style.transition = 'opacity 400ms ease';
+  fadeEl.style.opacity = 0;
+}
+
+/** 当前选中行的画面 */
+function syncStage(){
+  const u = units[selIdx];
+  const innerEl = $('stageInner'), fadeEl = $('stageFade'), kv = $('stageKv');
+  const has = !!u;
+  ['stPlay','stReset','stBig'].forEach(id => $(id).disabled = !has);
+  if (!has){
+    innerEl.innerHTML = '';
+    kv.innerHTML = '';
+    $('stagePos').textContent = '';
+    $('stageEmpty').style.display = 'flex';
+    return;
+  }
+  $('stageEmpty').style.display = 'none';
+  $('stagePos').textContent = `第 ${u.start+1} 行 · ${badgeOf(u)[1]}`;
+  paintStage(innerEl, fadeEl, u.st);
+
+  const bgName  = u.st.cg ? null : u.st.bg;
+  const bgFile  = u.st.cg ? ASSETS.cg[u.st.cg] : (u.st.bg ? ASSETS.bg[u.st.bg] : null);
+  const actors  = Object.entries(u.st.sprites);
+  const fxLine  = (u.type === 'note' && u.fx)
+    ? (u.fx.live
+        ? `<b class="live">${u.fx.tag}</b> —— ${esc(u.fx.desc)}`
+        : `<b class="${u.fx === FX.note ? 'none' : 'dead'}">${u.fx.tag}</b> —— ${esc(u.fx.desc)}`)
+    : '<span class="miss">（这一行没有运镜）</span>';
+
+  kv.innerHTML = `
+    <div>背景：${u.st.cg ? `<b>CG ${esc(u.st.cg)}</b>${ASSETS.cg[u.st.cg]?'':' <span class="none">素材缺失</span>'}` :
+      (u.st.bg ? `<b>${esc(u.st.bg)}</b>${bgFile ? '' : ' <span class="none">素材缺失</span>'}` : '<span class="miss">未设定</span>')}</div>
+    <div>BGM：${u.st.bgm ? `<b>${esc(u.st.bgm)}</b>` : '<span class="miss">静音</span>'}</div>
+    <div>立绘：${actors.length ? actors.map(([c,i]) =>
+        `<b>${esc(c)}</b>（${esc(i.pose)}｜${esc(i.slot)}）`).join('　') : '<span class="miss">无</span>'}</div>
+    <div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)">这一行：${fxLine}</div>`;
+  $('bigStageKv').innerHTML = kv.innerHTML;
+  $('bigStagePos').textContent = $('stagePos').textContent;
+}
+
+/* ============================================================
+   八、编辑单元
+   ============================================================ */
+const dlg = $('dlg');
+let dlgCtx = null;
+
+/** 从台本里实际收集用过的括注/素材名，作为候选（比硬编码准） */
+function collectUsed(){
+  const poses = {}, bgs = new Set(), bgms = new Set(), ses = new Set();
+  units.forEach(u => {
+    if (u.type === 'sprite' && u.detail) (poses[u.char] = poses[u.char] || new Set()).add(u.detail);
+    if (u.type === 'env') u.raw.split(/　+/).forEach(p => {
+      const m = p.match(/^(BG|BGM|SE)：(.*)$/); if (!m) return;
+      const v = m[2].trim();
+      if (m[1]==='BG' && v) bgs.add(v);
+      if (m[1]==='BGM' && v) bgms.add(v);
+      if (m[1]==='SE' && v) ses.add(v);
+    });
+    if (u.type === 'note' && u.se) ses.add(u.se);
+  });
+  return { poses, bgs:[...bgs], bgms:[...bgms], ses:[...ses] };
+}
+function datalist(id, arr){
+  return `<datalist id="${id}">${arr.map(v=>`<option value="${esc(v)}">`).join('')}</datalist>`;
+}
+
+function openEditor(idx){
+  const u = units[idx];
+  selIdx = idx; syncStage(); render();
+  const used = collectUsed();
+  const titles = {dialogue:'台词',env:'环境行',sprite:'立绘',note:'演出行',cg:'CG 行',
+                  block:'结构行（源码）',other:'行（源码）',scene:'场景行（源码）',chapter:'章节（源码）'};
+  $('dlgTitle').textContent = '编辑' + (titles[u.type] || '');
+  $('dlgType').textContent = badgeOf(u)[1];
+
+  let html = '';
+  dlgCtx = { idx, type: u.type };
+
+  if (u.type === 'dialogue'){
+    html += `<div class="fld-row">
+        <div class="fld" style="flex:0 0 150px"><label>说话人（【】自动补）</label>
+          <input id="f-speaker" list="dl-chars" value="${esc(u.name)}"></div>
+        <div class="fld"><label>性质 —— 决定游戏里怎么显示</label>
+          <select id="f-kind">
+            <option value="narration">叙述（无姓名框・正文降明度）</option>
+            <option value="inner">心声（无姓名框・斜体・樱粉）</option>
+            <option value="speech">台词（显示姓名框）</option>
+          </select></div>
+      </div>
+      <div id="f-kindnote"></div>
+      <div class="fld"><label>内容（可多行；（　）内为语气动作提示）</label>
+        <textarea id="f-text">${esc(u.text)}</textarea></div>`;
+  } else if (u.type === 'env'){
+    const f = parseEnv(u.raw);
+    html += `<div class="warn-strip">BG／BGM／SE 可以只保留其中任意几项；留空的项不会出现在行里。
+      常见组合：场景开头三项全带；中途单独切 BGM。停 BGM 请写 <code>BGM：无</code>。</div>
+      <div class="fld-row">
+        <div class="fld"><label>BG（背景）</label><input id="f-bg" list="dl-bg" value="${esc(f.BG||'')}" placeholder="例：教室_午休_喧闹"></div>
+        <div class="fld"><label>BGM</label><input id="f-bgm" list="dl-bgm" value="${esc(f.BGM||'')}" placeholder="例：日常（快）／无"></div>
+        <div class="fld"><label>SE（音效）</label><input id="f-se" list="dl-se" value="${esc(f.SE||'')}" placeholder="例：风声"></div>
+      </div>
+      <div class="fld"><label>行预览</label><input id="f-envprev" readonly style="background:#f8fafc;color:var(--sub)"></div>
+      <div id="f-envwarn"></div>`;
+  } else if (u.type === 'sprite'){
+    html += `<div class="fld-row">
+        <div class="fld" style="flex:0 0 140px"><label>角色</label><input id="f-char" list="dl-chars" value="${esc(u.char)}"></div>
+        <div class="fld"><label>表情・动作（（　）内）</label><input id="f-detail" list="dl-face" value="${esc(u.detail)}" placeholder="例：平静 / 微微歪头 / 不耐・起身"></div>
+        <div class="fld" style="flex:0 0 170px"><label>位置（可选）</label><input id="f-pos" list="dl-slot" value="${esc(u.pos||'')}" placeholder="例：左 / 长椅中央"></div>
+      </div>
+      <div class="fld"><label>行预览 & 实际取图</label><input id="f-spprev" readonly style="background:#f8fafc;color:var(--sub)"></div>`;
+  } else if (u.type === 'note'){
+    html += `<div class="fld-row">
+        <div class="fld" style="flex:0 0 220px"><label>行为候选（选一个自动填模板）</label>
+          <select id="f-preset">
+            <option value="">— 自由编写 —</option>
+            ${FX_PRESETS.map(p=>`<option value="${p.key}">${esc(p.label)}</option>`).join('')}
+          </select></div>
+        <div class="fld"><label>演出提示（※ 后的内容）</label>
+          <input id="f-text" value="${esc(u.text)}"></div>
+      </div>
+      <div id="f-fxnote"></div>`;
+  } else if (u.type === 'cg'){
+    html += `<div class="warn-strip">CG 行直接覆盖全屏。key 须在素材表里，否则程序里不显示。</div>
+             <div class="fld"><label>CG 内容（■ CG： 之后）</label><input id="f-cg" list="dl-cg" value="${esc(u.raw)}"></div>`;
+  } else {
+    html += `<div class="warn-strip">这是结构行（章节／选项块／备注等），直接改原文——改坏了会影响编译，慎重。</div>
+             <div class="fld"><label>源码</label><textarea id="f-raw">${esc(u.raw)}</textarea></div>`;
+  }
+  html += datalist('dl-chars', Object.keys(STEMS));
+  const curChar = u.type === 'sprite' ? u.char : '';
+  html += datalist('dl-face', [...(used.poses[curChar] || [])]);
+  html += datalist('dl-slot', Object.keys(SLOT_RATIO));
+  html += datalist('dl-bg', [...used.bgs, ...Object.keys(ASSETS.bg)]);
+  html += datalist('dl-bgm', [...new Set([...used.bgms, ...Object.keys(ASSETS.bgm), '无'])]);
+  html += datalist('dl-se', [...new Set([...used.ses, ...Object.keys(ASSETS.se)])]);
+  html += datalist('dl-cg', [...new Set([...Object.keys(ASSETS.cg)])]);
+  $('dlgBody').innerHTML = html;
+
+  if (u.type === 'dialogue'){
+    const kEl = $('f-kind');
+    kEl.value = u.kind || 'speech';
+    const upd = () => {
+      const nm = $('f-speaker').value.trim();
+      const isMe = nm === '我';
+      kEl.disabled = !isMe;
+      if (!isMe && kEl.value !== 'speech') kEl.value = 'speech';
+      let note;
+      if (kEl.value === 'inner')
+        note = `<div class="info-strip">游戏里：<b>无姓名框 ＋ 斜体 ＋ 樱粉 #e8a0b4</b>　→　写成 <code>【我】（心声）</code></div>`;
+      else if (kEl.value === 'narration')
+        note = `<div class="info-strip">游戏里：<b>无姓名框 ＋ 正文降明度 #b8b2c4</b>　→　写成 <code>【我】</code></div>`;
+      else
+        note = `<div class="info-strip">游戏里：<b>显示姓名框</b>，内容自动补全名为「<b>${esc(FULLNAME[nm] || nm)}</b>」${FULLNAME[nm] ? '' : '（不在映射表里 → 原样显示）'}</div>`;
+      if (!isMe) note += `<div class="warn-strip" style="margin-top:6px">只有「我」用得了「心声／叙述」；角色台词恒为台词（speech）。</div>`;
+      $('f-kindnote').innerHTML = note;
+    };
+    $('f-speaker').addEventListener('input', upd);
+    kEl.addEventListener('change', upd);
+    upd();
+  }
+  if (u.type === 'env'){
+    const upd = () => {
+      const bg = $('f-bg').value.trim(), bgm = $('f-bgm').value.trim(), se = $('f-se').value.trim();
+      $('f-envprev').value = buildEnv(bg,bgm,se);
+      const probs = [];
+      if (bg && !ASSETS.bg[bg] && !/^(同前|不变)/.test(bg)) probs.push(`BG「${bg}」不在素材表里 → 程序里切不过去`);
+      if (bgm && bgm !== '无' && !ASSETS.bgm[bgm]) probs.push(`BGM「${bgm}」不在素材表里 → 程序里不会响`);
+      if (se && !ASSETS.se[se]) probs.push(`SE「${se}」不在素材表里 → 程序里不会响`);
+      $('f-envwarn').innerHTML = probs.length ? `<div class="err-strip">${probs.join('<br>')}</div>` : '';
+    };
+    ['f-bg','f-bgm','f-se'].forEach(id => $(id).addEventListener('input', upd));
+    upd();
+  }
+  if (u.type === 'sprite'){
+    const upd = () => {
+      const c = $('f-char').value.trim(), d = $('f-detail').value, p = $('f-pos').value.trim();
+      const f = spriteFile(c, d);
+      $('f-spprev').value = f ? `\`■ 立绘：${c}（${d}）${p?'｜'+p:''}\`　→　取图 char/${f}` : `⚠ 角色「${c}」不在 STEMS 表，程序里不会出图`;
+      const dl = $('dl-face');
+      dl.innerHTML = [...(used.poses[c] || [])].map(x=>`<option value="${esc(x)}">`).join('');
+    };
+    ['f-char','f-detail','f-pos'].forEach(id => $(id).addEventListener('input', upd));
+    upd();
+  }
+  if (u.type === 'note'){
+    const upd = () => {
+      const body = $('f-text').value.replace(/SE：[^\u3000]+/,'').trim();
+      const fx = body ? starToFx(body) : null;
+      if (!fx){ $('f-fxnote').innerHTML = ''; return; }
+      $('f-fxnote').innerHTML = fx.live
+        ? `<div class="info-strip">✅ 程序里会执行：<b>${fx.tag}</b> —— ${esc(fx.desc)}</div>`
+        : `<div class="warn-strip">⚠️ 程序里<b>不会产生画面动作</b>：${esc(fx.tag)} —— ${esc(fx.desc)}<br>
+             想让它动，须写成：<code>${esc(fx.kw)}</code></div>`;
+    };
+    const presetEl = $('f-preset');
+    presetEl.addEventListener('change', () => {
+      const p = FX_PRESETS.find(x => x.key === presetEl.value);
+      if (p && p.tpl){ $('f-text').value = p.tpl; upd(); $('f-text').focus(); }
+    });
+    $('f-text').addEventListener('input', upd);
+    upd();
+  }
+  dlg.showModal();
+}
+function parseEnv(raw){
+  const out = {};
+  raw.split(/　+/).forEach(part => {
+    const m = part.match(/^(BG|BGM|SE)：(.*)$/);
+    if (m) out[m[1]] = m[2].trim();
+  });
+  return out;
+}
+function buildEnv(bg, bgm, se){
+  return ['BG：'+bg,'BGM：'+bgm,'SE：'+se].filter(p => p.length > 4).join('　　');
+}
+$('dlgCancel').onclick = () => dlg.close();
+$('dlgOk').onclick = () => {
+  const u = units[dlgCtx.idx];
+  snapshot();
+  if (u.type === 'dialogue'){
+    const sp = $('f-speaker').value.trim().replace(/[【】]/g,'');
+    const kind = $('f-kind').value;
+    // ⚠️ （心声）只对「我」生效（parser.ts resolveSpeaker：tag==='我' 才看心声标记）
+    const head = `【${sp}】` + (sp === '我' && kind === 'inner' ? '（心声）' : '');
+    u.text = $('f-text').value.replace(/\r/g,'');
+    rawLines.splice(u.start, u.end-u.start+1, ...[head, ...u.text.split('\n')]);
+  } else if (u.type === 'env'){
+    rawLines.splice(u.start, 1, '`' + buildEnv($('f-bg').value.trim(), $('f-bgm').value.trim(), $('f-se').value.trim()) + '`');
+  } else if (u.type === 'sprite'){
+    const c = $('f-char').value.trim(), d = $('f-detail').value.trim(), p = $('f-pos').value.trim();
+    rawLines.splice(u.start, 1, `\`■ 立绘：${c}（${d}）${p?'｜'+p:''}\``);
+  } else if (u.type === 'note'){
+    const t = $('f-text').value.replace(/\r/g,'').trim();
+    rawLines.splice(u.start, 1, '`※ ' + t + '`');
+  } else if (u.type === 'cg'){
+    rawLines.splice(u.start, 1, '`■ CG：' + $('f-cg').value.trim() + '`');
+  } else {
+    rawLines.splice(u.start, 1, $('f-raw').value.replace(/\r/g,''));
+  }
+  dlg.close(); rebuild(); markDirty();
+  toast('已修改（记得保存）');
+};
+
+/* ============================================================
+   九、新增行
+   ============================================================ */
+const insDlg = $('insDlg');
+let insAt = 0, insType = 'dialogue';
+
+function openInsert(atLine){
+  insAt = atLine;
+  const u = units[selIdx];
+  $('insWhere').textContent = `插入位置：第 ${atLine+1} 行前`;
+  insDlg.showModal();
+  renderInsForm();
+}
+function renderInsForm(){
+  document.querySelectorAll('#insTypes .chip').forEach(c => c.classList.toggle('active', c.dataset.t === insType));
+  const used = collectUsed();
+  let html = '';
+  if (insType === 'dialogue'){
+    html = `<div class="fld"><label>说话人</label>
+        <input id="i-sp" list="dl-chars" value="樱" placeholder="我 / 龙司 / 樱 / 阳太 / 亚里沙 / 九条院 / 泽渡">
+        <span class="spin">填「我」＝主角叙述（第一人称）；填「我」（心声）写进台词开头即可；主角不在场用（画外音）。</span></div>
+      <div class="fld"><label>台词 / 叙述正文</label><textarea id="i-tx" placeholder="（动作提示）可以单独成行"></textarea></div>`;
+  } else if (insType === 'sprite'){
+    html = `<div class="fld-row">
+        <div class="fld" style="flex:0 0 140px"><label>角色</label><input id="i-char" list="dl-chars" value="樱"></div>
+        <div class="fld"><label>表情・动作（括注）</label><input id="i-detail" list="dl-face" value="平静"></div>
+        <div class="fld" style="flex:0 0 170px"><label>位置（可选）</label><input id="i-pos" list="dl-slot"></div>
+      </div>`;
+  } else if (insType === 'env'){
+    html = `<div class="fld-row">
+        <div class="fld"><label>BG</label><input id="i-bg" list="dl-bg"></div>
+        <div class="fld"><label>BGM</label><input id="i-bgm" list="dl-bgm"></div>
+        <div class="fld"><label>SE</label><input id="i-se" list="dl-se"></div>
+      </div>`;
+  } else if (insType === 'note'){
+    html = `<div class="fld-row">
+        <div class="fld" style="flex:0 0 220px"><label>行为候选（选一个自动填模板）</label>
+          <select id="i-preset">
+            <option value="">— 自由编写 —</option>
+            ${FX_PRESETS.map(p=>`<option value="${p.key}">${esc(p.label)}</option>`).join('')}
+          </select></div>
+        <div class="fld"><label>演出提示（※ 后的内容）</label>
+          <input id="i-note" placeholder="例：特写：书封　　SE：书页轻响"></div>
+      </div>
+      <div class="info-strip">能被程序执行的写法：<b>特写…</b>（推镜 6%）｜<b>镜头…／远景…</b>（镜头 3.5%）｜含 <b>FADE OUT</b>（黑场）｜
+      <b>雀跃</b>（立绘跳一下）｜<b>白闪</b>｜<b>花瓣密／疏／停</b>｜含 <b>停顿／静止／静默／停留／时间流逝</b>（节拍，但画面不动）。其余只是备注。</div>`;
+  } else if (insType === 'cg'){
+    html = `<div class="fld"><label>CG 内容</label><input id="i-cg" list="dl-cg" placeholder="例：长椅默读"></div>`;
+  } else if (insType === 'scene'){
+    html = `<div class="fld"><label>SCENE 标题</label><input id="i-scene" placeholder="■ SCENE 02｜北校舍・旧樱树下・长椅｜午休｜晴"></div>`;
+  } else {
+    html = `<div class="fld"><label>开发者备注（编译器完全忽略）</label><textarea id="i-cmt"></textarea></div>
+      <div class="info-strip">写备注请用 <code>%%</code>，<b>不要用 ※</b> —— ※ 会被当演出编译，可能产生意外效果。</div>`;
+  }
+  html += datalist('dl-chars', Object.keys(STEMS)) + datalist('dl-face', [])
+        + datalist('dl-slot', Object.keys(SLOT_RATIO))
+        + datalist('dl-bg', [...used.bgs, ...Object.keys(ASSETS.bg)])
+        + datalist('dl-bgm', [...new Set([...used.bgms, ...Object.keys(ASSETS.bgm), '无'])])
+        + datalist('dl-se', [...new Set([...used.ses, ...Object.keys(ASSETS.se)])])
+        + datalist('dl-cg', Object.keys(ASSETS.cg));
+  $('insForm').innerHTML = html;
+  ['i-sp','i-tx','i-char','i-detail','i-pos','i-bg','i-bgm','i-se','i-note','i-cg','i-scene','i-cmt']
+    .forEach(id => { const el = $(id); if (el) el.addEventListener('input', updInsPreview); });
+  if (insType === 'sprite'){ const c = $('i-char'), d = $('i-detail'); if (c && d) c.addEventListener('input', () => { $('dl-face').innerHTML = [...(used.poses[c.value.trim()]||[])].map(x=>`<option value="${esc(x)}">`).join(''); updInsPreview(); }); }
+  if (insType === 'note'){
+    const pe = $('i-preset');
+    if (pe) pe.addEventListener('change', () => {
+      const p = FX_PRESETS.find(x => x.key === pe.value);
+      if (p && p.tpl){ $('i-note').value = p.tpl; updInsPreview(); $('i-note').focus(); }
+    });
+  }
+  updInsPreview();
+}
+/** 生成将写入的行（与台本语法一致） */
+function buildInsertLines(){
+  if (insType === 'dialogue'){
+    const sp = ($('i-sp').value || '').trim();
+    const body = $('i-tx').value.replace(/\r/g,'');
+    return [`【${sp.replace(/[【】]/g,'')}】`, ...body.split('\n')];
+  }
+  if (insType === 'sprite') return [`\`■ 立绘：${$('i-char').value.trim()}（${$('i-detail').value.trim()}）${$('i-pos').value.trim()?'｜'+$('i-pos').value.trim():''}\``];
+  if (insType === 'env')    return ['`' + buildEnv($('i-bg').value.trim(), $('i-bgm').value.trim(), $('i-se').value.trim()) + '`'];
+  if (insType === 'note')   return ['`※ ' + $('i-note').value.trim() + '`'];
+  if (insType === 'cg')     return ['`■ CG：' + $('i-cg').value.trim() + '`'];
+  if (insType === 'scene')  return ['`' + $('i-scene').value.trim().replace(/^`|`$/g,'') + '`'];
+  return [$('i-cmt').value.split('\n').map(l => '%% ' + l).join('\n')];
+}
+function updInsPreview(){
+  let lines;
+  try { lines = buildInsertLines(); } catch(e){ lines = ['']; }
+  $('insPrev').textContent = lines.join('\n') || '（空）';
+  let note = '';
+  if (insType === 'note'){
+    const body = lines[0].replace(/^`\s*※\s*/,'').replace(/`$/,'').trim();
+    const { body:clean } = parseStarRaw(lines[0]);
+    const fx = clean ? starToFx(clean) : null;
+    if (fx) note = fx.live
+      ? `<div class="info-strip">✅ 程序里会执行：<b>${fx.tag}</b> —— ${esc(fx.desc)}</div>`
+      : `<div class="warn-strip">⚠️ 这条在程序里<b>不会有画面动作</b>（${esc(fx.tag)}）—— ${esc(fx.desc)}。<br>想让它动：${esc(fx.kw)}</div>`;
+  } else if (insType === 'env'){
+    const bg = $('i-bg').value.trim(), bgm = $('i-bgm').value.trim(), se = $('i-se').value.trim();
+    const probs = [];
+    if (bg && !ASSETS.bg[bg] && !/^(同前|不变)/.test(bg)) probs.push(`BG「${bg}」不在素材表 → 程序里切不过去`);
+    if (bgm && bgm !== '无' && !ASSETS.bgm[bgm]) probs.push(`BGM「${bgm}」不在素材表 → 程序里不会响`);
+    if (se && !ASSETS.se[se]) probs.push(`SE「${se}」不在素材表 → 程序里不会响`);
+    if (probs.length) note = `<div class="err-strip">${probs.join('<br>')}</div>`;
+  } else if (insType === 'sprite'){
+    const f = spriteFile($('i-char').value.trim(), $('i-detail').value.trim());
+    if (!f) note = `<div class="err-strip">角色不在 STEMS 表 → 程序里不会出图</div>`;
+    else note = `<div class="info-strip">实际取图 <code>char/${esc(f)}</code></div>`;
+  }
+  $('insFxNote').innerHTML = note;
+}
+document.querySelectorAll('#insTypes .chip').forEach(c => c.onclick = () => { insType = c.dataset.t; renderInsForm(); });
+$('insCancel').onclick = () => insDlg.close();
+$('insOk').onclick = () => {
+  const lines = buildInsertLines();
+  if (!lines.join('').trim()){ toast('内容为空，未插入'); return; }
+  snapshot();
+  // 插入位置前后补空行，保持台本的块边界语义（▸/▲ 块靠空行收尾）
+  const at = Math.min(insAt, rawLines.length);
+  const needBlankBefore = at > 0 && rawLines[at-1] !== '';
+  const needBlankAfter  = at < rawLines.length && rawLines[at] !== '' && rawLines[at] !== undefined;
+  const block = [...(needBlankBefore ? [''] : []), ...lines, ...(needBlankAfter ? [''] : [])];
+  rawLines.splice(at, 0, ...block);
+  insDlg.close(); rebuild(); markDirty();
+  // 定位到新插入的单元
+  const target = units.findIndex(u => u.start >= at && u.type !== 'chapter');
+  selIdx = target >= 0 ? target : units.length - 1;
+  syncStage(); render();
+  toast('已插入 ' + lines.length + ' 行（记得保存）');
+};
+$('btnInsert').onclick = () => {
+  const at = (selIdx >= 0 && units[selIdx]) ? units[selIdx].end + 1 : rawLines.length;
+  openInsert(at);
+};
+
+/* ============================================================
+   十、演出体检
+   ============================================================ */
+const auditDlg = $('auditDlg');
+$('btnAudit').onclick = () => { renderAudit(); auditDlg.showModal(); };
+$('auditClose').onclick = () => auditDlg.close();
+
+/** 给「该生效但没生效」的 ※ 行一句可操作的改写建议 */
+function adviceFor(u){
+  if (!u.fx || u.fx.live) return '';
+  const t = u.text || '';
+  if (u.fx === FX.note){
+    if (/亮|睁大|瞪大|眼睛.{0,4}弯|弯.{0,4}眼|意外|惊|嬉|兴奋|激动|欢呼|惊喜/.test(t))
+      return '像是在写情绪高点 —— 想让立绘跳一下，另起一行写「※ 雀跃」（或「※ 雀跃：樱」）';
+    if (/一拍|一瞬|片刻|几秒|僵|顿住|停住|停下|静了一|沉默/.test(t))
+      return '像是在写节拍 —— 若想走节拍分支，改成「停顿一拍」或「静止一拍」';
+    if (/特写|近景|拉近|放大/.test(t))
+      return '像是想要特写 —— 改成以「特写」二字开头 → 推镜 6%';
+    if (/镜头|推近|拉远|摇向|下压|远景/.test(t))
+      return '像是镜头调度 —— 改成以「镜头」或「远景」开头 → 镜头 3.5%';
+    return '程序不会执行这条；纯给美术/配音看的备注请改用 %% 前缀';
+  }
+  if (u.fx === FX.beat) return '节拍分支，但引擎是空实现 —— 想要画面动，改用「特写…」或「镜头…」';
+  if (u.fx === FX.blur) return '「慢镜」要 PixiJS 滤镜，尚未实现 —— 想要画面动，改用「特写…」或「镜头…」';
+  return '';
+}
+function renderAudit(){
+  const notes = units.filter(u => u.type === 'note');
+  const live  = notes.filter(u => u.fx && u.fx.live);
+  const dead  = notes.filter(u => u.fx && u.fx.dead);
+  const none  = notes.filter(u => u.fx && u.fx === FX.note);
+  const bad   = notes.filter(u => u.bgmErr);
+  const byType = {};
+  // ★ 必须遍历全部 notes（不能只用 live）：beat/blur 是 live:false，否则计数恒为 0
+  notes.forEach(u => { if (u.fx) byType[u.fx.tag] = (byType[u.fx.tag] || 0) + 1; });
+
+  const deadList = [...dead, ...none].sort((a,b) => (a.fx === FX.note ? 0 : 1) - (b.fx === FX.note ? 0 : 1) || a.start - b.start)
+    .map(u => {
+      const adv = adviceFor(u);
+      return `<div class="frow" data-line="${u.start}">
+        <span class="ln">L${u.start+1}</span>
+        <span class="tx"><span class="fxtag ${u.fx.cls}">${u.fx.live?'':'⚠ '}${u.fx.tag}</span> ${esc(u.text)}
+          ${adv ? `<div class="hintx">↳ ${esc(adv)}</div>` : ''}</span></div>`;
+    }).join('') || '<div class="frow"><span class="tx" style="color:var(--sub)">没有 —— 全部 ※ 行都能被程序执行 🎉</span></div>';
+
+  $('auditBody').innerHTML = `
+    <div class="audit-grid">
+      <div class="acard all"><div class="n">${notes.length}</div><div class="l">※ 行总数</div></div>
+      <div class="acard ok"><div class="n">${live.length}</div><div class="l">有画面动作</div></div>
+      <div class="acard dead"><div class="n">${dead.length}</div><div class="l">映射成功但不动</div></div>
+      <div class="acard none"><div class="n">${none.length}</div><div class="l">完全不执行</div></div>
+    </div>
+    ${bad.length ? `<div class="err-strip"><b>${bad.length} 处编译期 ERROR</b>：※ 行内写了 BGM 指示（${bad.map(u=>'L'+(u.start+1)).join('、')}）—— 停 BGM 请另起一行写「BGM：无」。</div>` : ''}
+    <div class="info-strip">
+      <b>判定口径（＝ tools/compiler/parser.ts 的 starToFx，改台本前先看这张表）</b>
+      <table class="kw" style="margin-top:8px">
+        <tr><th style="width:150px">程序里做什么</th><th style="width:250px">必须怎么写</th><th>命中数</th></tr>
+        ${KW_TABLE.map(r => `<tr><td>${r.fx.tag}${r.fx.live ? '' : '（<b>无画面动作</b>）'}</td><td>${r.how}</td><td>${byType[r.fx.tag] || 0}</td></tr>`).join('')}
+        <tr><td>📝 其余＝注释</td><td>以上都没踩中 → <b>程序完全忽略</b>（写备注请用 <code>%%</code> 前缀）</td><td>${none.length}</td></tr>
+      </table>
+      <div style="margin-top:8px">⚠ 易错：<code>停顿一拍</code> <b>不命中</b>（白名单里是「停留」不是「停顿」）；<code>静止一拍</code> 才命中。</div>
+    </div>
+    <div class="fld"><label>需要处理的 ${dead.length + none.length} 条（点一行跳到台本对应位置）</label>
+      <div class="flist" id="auditList">${deadList}</div></div>`;
+
+  $('auditList').addEventListener('click', e => {
+    const row = e.target.closest('.frow[data-line]');
+    if (!row) return;
+    const line = +row.dataset.line;
+    const idx = units.findIndex(u => u.start === line);
+    auditDlg.close();
+    if (idx >= 0){
+      selIdx = idx; if (curFilter !== 'all' && curFilter !== 'note'){ curFilter = 'note'; applyFilter(); }
+      render(); syncStage();
+      const el = listEl.querySelector(`.unit[data-idx="${idx}"]`);
+      if (el) el.scrollIntoView({ block:'center', behavior:'smooth' });
+      else toast('该行在当前筛选下不可见，已切到「※演出」筛选');
+    }
+  });
+}
+
+/* ============================================================
+   十一、列表事件
+   ============================================================ */
+listEl.addEventListener('click', e => {
+  const op = e.target.closest('button');
+  if (op){
+    const unitEl = op.closest('.unit');
+    if (!unitEl) return;
+    const idx = +unitEl.dataset.idx;
+    if (op.dataset.a === 'ins')  return openInsert(units[idx].end + 1);
+    if (op.dataset.a === 'up')   return moveUnit(idx, -1);
+    if (op.dataset.a === 'down') return moveUnit(idx, 1);
+    if (op.dataset.a === 'del')  return deleteUnit(idx);
+    return;
+  }
+  const unitEl = e.target.closest('.unit');
+  if (!unitEl) return;
+  const idx = +unitEl.dataset.idx;
+  const u = units[idx];
+  selIdx = idx;
+  render(); syncStage();
+  if (['dialogue','env','sprite','note','cg','block','other','scene'].includes(u.type)) openEditor(idx);
+});
+
+/* 更稳的移动：交换两个单元的行块 */
+function moveUnit(idx, dir){
+  const u = units[idx], t = units[idx + dir];
+  if (!t){ toast('已到边界'); return; }
+  if (!confirm('移动会改变演出时序；若邻近 ◆ 选项块／▸ 变体块，可能破坏编译结构。\n确定移动吗？')) return;
+  snapshot();
+  const lo = Math.min(u.start, t.start), hi = Math.max(u.end, t.end);
+  const seg = rawLines.slice(lo, hi+1);
+  const uLen = u.end - u.start + 1, tLen = t.end - t.start + 1;
+  let swapped;
+  if (dir === -1){
+    const tb = seg.slice(0, tLen), ub = seg.slice(tLen);
+    swapped = ub.concat(tb);
+  } else {
+    const ub = seg.slice(0, uLen), tb = seg.slice(uLen);
+    swapped = tb.concat(ub);
+  }
+  rawLines.splice(lo, hi-lo+1, ...swapped);
+  selIdx = idx + dir;
+  rebuild(); markDirty(); render(); syncStage();
+}
+function deleteUnit(idx){
+  const u = units[idx];
+  if (!confirm(`删除该「${badgeOf(u)[1]}」单元？\n${previewOf(u)}\n（可用「撤销」找回）`)) return;
+  snapshot();
+  rawLines.splice(u.start, u.end - u.start + 1);
+  if (selIdx >= idx) selIdx = Math.max(0, selIdx - 1);
+  rebuild(); markDirty(); render(); syncStage();
+}
+
+document.querySelectorAll('#toolbar .chip').forEach(c => c.onclick = () => { curFilter = c.dataset.f; applyFilter(); });
+$('search').addEventListener('input', e => { curSearch = e.target.value.trim(); render(); });
+
+/* ============================================================
+   十二、舞台交互
+   ============================================================ */
+$('btnStage').onclick = () => {
+  stageOpen = !stageOpen;
+  $('stage').classList.toggle('open', stageOpen);
+  $('btnStage').classList.toggle('on', stageOpen);
+  if (stageOpen){ syncStage(); setTimeout(() => $('stageInner') && fitStage($('stageInner')), 60); }
+};
+$('stPlay').onclick = () => {
+  const u = units[selIdx]; if (!u) return;
+  if (!u.fx || !u.fx.live){ toast('这一行在程序里不会有画面动作'); return; }
+  playFx($('stageInner'), $('stageFade'), u.fx);
+};
+$('stReset').onclick = () => resetFx($('stageInner'), $('stageFade'));
+$('stBig').onclick = () => {
+  const u = units[selIdx]; if (!u) return;
+  const inner = $('bigStageInner'), fade = $('bigStageFade');
+  paintStage(inner, fade, u.st);
+  // 大图舞台宽度需在 dialog 打开后才算得出
+  setTimeout(() => { fitStage(inner); if (u.fx && u.fx.live) setTimeout(()=>playFx(inner, fade, u.fx), 120); }, 80);
+  $('bigStage').showModal();
+};
+$('bgPlay').onclick = () => { const u = units[selIdx]; if (u && u.fx && u.fx.live) playFx($('bigStageInner'), $('bigStageFade'), u.fx); else toast('这一行没有可播放的运镜'); };
+$('bgReset').onclick = () => resetFx($('bigStageInner'), $('bigStageFade'));
+$('bigClose').onclick = () => $('bigStage').close();
+window.addEventListener('resize', () => {
+  if ($('stageInner') && $('stageInner').innerHTML) fitStage($('stageInner'));
+  if ($('bigStageInner') && $('bigStageInner').innerHTML && $('bigStage').open) fitStage($('bigStageInner'));
+});
+
+/* ============================================================
+   十三、打开 / 保存 / 撤销
+   ============================================================ */
+async function openFile(){
+  if (!window.showOpenFilePicker){ $('fallback').style.display = 'block'; return; }
+  try {
+    [fileHandle] = await window.showOpenFilePicker({
+      types:[{description:'台本 Markdown', accept:{'text/markdown':['.md','.txt']}}],
+    });
+    await idbSet('scriptHandle', fileHandle);
+    const f = await fileHandle.getFile();
+    loadText(await f.text());
+    toast('已打开：' + f.name + '（下次自动恢复）');
+  } catch(err){
+    if (err && err.name === 'AbortError') return;
+    toast('直接打开失败（' + (err && err.name || '未知') + '）——已切换到粘贴/选择文件模式');
+    $('fallback').style.display = 'block';
+  }
+}
+async function loadFromHandle(msg){
+  try{
+    const f = await fileHandle.getFile();
+    loadText(await f.text());
+    toast(msg + '：' + f.name);
+  }catch(err){ toast('读取失败：' + (err && err.message || err)); }
+}
+function loadText(text){
+  rawLines = text.replace(/\r\n/g,'\n').split('\n');
+  undoStack = []; $('btnUndo').disabled = true;
+  dirty = false; $('dirty').style.display = 'none';
+  $('btnSave').disabled = false;
+  $('fallback').style.display = 'none';
+  $('restore-banner').style.display = 'none';
+  ['btnInsert','btnAudit','btnStage'].forEach(id => $(id).disabled = false);
+  selIdx = -1; rebuild(); render(); syncStage();
+}
+async function saveFile(){
+  const text = rawLines.join('\n');
+  if (fileHandle){
+    try{
+      let perm = await fileHandle.queryPermission({mode:'readwrite'});
+      if (perm !== 'granted') perm = await fileHandle.requestPermission({mode:'readwrite'});
+      const w = await fileHandle.createWritable();
+      await w.write(text); await w.close();
+      dirty = false; $('dirty').style.display = 'none';
+      toast('已保存 ✓ 记得跑 npm run compile 重编 script.json');
+    }catch(err){ toast('保存失败：' + (err && err.message || err)); }
+  } else if (fbMode || httpMode){
+    fbDownload();
+  } else {
+    toast('没有可保存的文件句柄');
+  }
+}
+$('btnOpen').onclick = openFile;
+$('btnSave').onclick = saveFile;
+$('btnRestore').onclick = async () => {
+  if (!fileHandle) return;
+  try{
+    const perm = await fileHandle.requestPermission({mode:'readwrite'});
+    if (perm === 'granted') await loadFromHandle('已恢复台本');
+    else toast('未获得文件权限');
+  }catch(err){ toast('恢复失败：' + (err && err.message || err)); }
+};
+
+/* ============================================================
+   十四、IndexedDB：记住上次打开的台本
+   ============================================================ */
+function idbOpen(){
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('xiaoying-editor', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idbGet(key){
+  try{
+    const db = await idbOpen();
+    return await new Promise((res, rej) => {
+      const rq = db.transaction('kv','readonly').objectStore('kv').get(key);
+      rq.onsuccess = () => res(rq.result);
+      rq.onerror = () => rej(rq.error);
+    });
+  }catch(e){ return null; }
+}
+async function idbSet(key, val){
+  try{
+    const db = await idbOpen();
+    db.transaction('kv','readwrite').objectStore('kv').put(val, key);
+  }catch(e){}
+}
+
+/* ============================================================
+   十五、启动：三层自动加载
+   ============================================================ */
+(async function init(){
+  if (location.protocol.startsWith('http')){
+    for (const p of ['../笑樱_galgame台本.md', './笑樱_galgame台本.md']){
+      try{
+        const r = await fetch(p, {cache:'no-store'});
+        if (r.ok){
+          const t = await r.text();
+          if (/^#\s*第.+[章幕]/m.test(t) && t.includes('SCENE')){
+            loadText(t); httpMode = true;
+            $('btnSave').textContent = '⬇️ 下载保存';
+            toast('已自动读取台本 ✓（预览模式：保存=下载后覆盖原文件）');
+            return;
+          }
+        }
+      }catch(e){}
+    }
+  }
+  const h = await idbGet('scriptHandle');
+  if (h){
+    fileHandle = h;
+    try{
+      const perm = await h.queryPermission({mode:'readwrite'});
+      if (perm === 'granted'){ await loadFromHandle('已自动打开上次的台本 ✓'); return; }
+    }catch(e){}
+    $('restore-banner').style.display = 'flex';
+    return;
+  }
+  listEl.innerHTML = `<div style="margin:60px auto;text-align:center;color:var(--sub);font-size:14px;line-height:2.2">
+    👆 点左上角「📂 打开台本」选择 <b style="color:var(--blue)">笑樱_galgame台本.md</b>（项目根目录）<br>
+    之后每次打开会<b>自动恢复</b>，不用再选<br>
+    打开后：<b>点任意一行</b>右侧就显示程序里那一刻的画面；<b>＋</b> 可在此行下插入新行；<b>🩺 演出体检</b>列出所有不会生效的 ※ 行<br>
+    <span style="font-size:12px">建议用 Chrome / Edge 直接双击打开本 html，拥有完整读写与看图能力</span></div>`;
+})();
+
+$('btnUndo').onclick = () => {
+  if (!undoStack.length) return;
+  rawLines = JSON.parse(undoStack.pop());
+  if (!undoStack.length) $('btnUndo').disabled = true;
+  rebuild(); markDirty(); render(); syncStage(); toast('已撤销');
+};
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key === 's'){ e.preventDefault(); if (dirty) saveFile(); }
+  if (e.key === 'Escape' && stageOpen && !document.querySelector('dialog[open]')){
+    stageOpen = false; $('stage').classList.remove('open'); $('btnStage').classList.remove('on');
+  }
+});
+
+/* ============================================================
+   十六、无 FS API 降级
+   ============================================================ */
+$('fbFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  loadText(await f.text()); fbMode = true;
+  toast('已读取（保存=下载文件，手动覆盖原文件）');
+});
+$('fbParse').onclick = () => { loadText($('fbText').value); fbMode = true; };
+function fbDownload(){
+  const blob = new Blob([rawLines.join('\n')], {type:'text/markdown'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = '笑樱_galgame台本.md'; a.click();
+  toast('已下载 —— 请手动覆盖 笑樱_galgame台本.md 后运行 npm run compile');
+}
+</script>
+</body>
+</html>
