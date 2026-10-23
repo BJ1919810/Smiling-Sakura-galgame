@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-21T17:12:25.534Z",
+  "generatedAt": "2026-10-23T14:46:06.181Z",
   "source": "script.json",
   "note": "中文 key → ASCII 文件名映射。文件名一律 ASCII 以规避打包 / 分发环节的编码坑；美术与音频按本表投放素材。台本改动后重跑 `npm run compile && npm run manifest` 即可刷新。",
   "stats": {

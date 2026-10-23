@@ -16,7 +16,7 @@ open class BuildTask : DefaultTask() {
 
     @TaskAction
     fun assemble() {
-        val executable = """C:\Users\zbj\.workbuddy\binaries\node\versions\22.22.2-3\node.exe""";
+        val executable = """C:\Users\zbj\.workbuddy\binaries\node\versions\22.22.2-6\node.exe""";
         try {
             runTauriCli(executable)
         } catch (e: Exception) {

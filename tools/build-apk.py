@@ -29,9 +29,31 @@ NDK_HOME = r'D:\Android\Sdk\ndk\27.0.12077973'
 GRADLE_HOME = r'D:\Android\gradle-home'
 CARGO_TARGET = r'D:\Android\build\target-xiaoying'
 RUST_BIN = r'C:\Users\zbj\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin'
-NODE = r'C:\Users\zbj\.workbuddy\binaries\node\versions\22.22.2-3\node.exe'
+
+
+def _find_node() -> str:
+    """定位 node.exe（★ 2026-10-23：曾硬编码 `node\versions\22.22.2-3\node.exe`，
+    而 managed 目录实际是 `22.22.2-6` —— 后缀随下载批次变，硬编码必炸，
+    症状是 subprocess 抛 `FileNotFoundError: [WinError 2]`，看着像缺文件其实是 exec 路径失效）。
+
+    优先级：环境变量 NODE_EXE ＞ managed versions 下最新一版 ＞ PATH 里的 node。
+    """
+    env_node = os.environ.get('NODE_EXE')
+    if env_node and os.path.exists(env_node):
+        return env_node
+    base = r'C:\Users\zbj\.workbuddy\binaries\node\versions'
+    if os.path.isdir(base):
+        for d in sorted(os.listdir(base), reverse=True):
+            exe = os.path.join(base, d, 'node.exe')
+            if os.path.exists(exe):
+                return exe
+    return shutil.which('node') or 'node'
+
+
+NODE = _find_node()
 
 SO = os.path.join(CARGO_TARGET, 'aarch64-linux-android', 'debug', 'libxiaoying_lib.so')
+LOG_DIR = os.path.join(ROOT, '.workbuddy', 'tmp')
 SKIP_DIRS = {'node_modules', '.workbuddy', '.git', 'dist', 'target', 'gen-android-build',
              'downloads', '素材基准', '.shots'}
 SKIP_FILES = {'笑樱-测试版.exe', '笑樱-测试版.apk'}
@@ -87,17 +109,29 @@ def sync(dst_root: str, src_root: str) -> None:
 
 
 def run(cmd: list, cwd: str, env: dict, label: str) -> None:
+    """跑一步外部命令，输出**实时写日志文件**。
+
+    ★ 2026-10-23：原实现用 `capture_output=True` 把输出全憋在内存里 —— 首次 Android
+    交叉编译一跑就是十几分钟，中途既看不到进度、也没法判断「在编」还是「卡死」
+    （实测卡死 31 分钟，靠「target 里最后一个产物时间不动」才发现）。
+    改成 stdout/stderr 直接落盘：全程可追，卡住时能看最后一行，失败时打尾部。
+    """
     log(f'▶ {label}')
-    p = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True,
-                       encoding='utf-8', errors='replace')
-    tail = (p.stdout or '').strip().splitlines()[-12:]
-    for line in tail:
+    os.makedirs(LOG_DIR, exist_ok=True)
+    safe = re.sub(r'[^\w\u4e00-\u9fff-]', '-', label)
+    logpath = os.path.join(LOG_DIR, f'apk-{safe}.log')
+    with open(logpath, 'w', encoding='utf-8', errors='replace') as lf:
+        p = subprocess.run(cmd, cwd=cwd, env=env,
+                           stdout=lf, stderr=subprocess.STDOUT)
+    with open(logpath, encoding='utf-8', errors='replace') as lf:
+        lines = lf.read().strip().splitlines()
+    for line in lines[-12:]:
         print('   ' + line, flush=True)
     if p.returncode != 0:
-        err = (p.stderr or '').strip().splitlines()[-20:]
-        for line in err:
+        for line in lines[-25:]:
             print('   ! ' + line, flush=True)
-        raise SystemExit(f'{label} 失败 exit={p.returncode}')
+        raise SystemExit(f'{label} 失败 exit={p.returncode}（完整日志：{logpath}）')
+    log(f'   日志：{logpath}')
 
 
 def newest_source_mtime() -> float:
@@ -205,6 +239,15 @@ def main() -> int:
             '                )\n',
             '                val fallbacks = listOf<String>()\n',
         )
+        # ★ 2026-10-23：模板把 **node.exe 的绝对路径**也写死在 BuildTask.kt 里
+        #   （`val executable = """…\node\versions\22.22.2-3\node.exe"""`）。managed node
+        #   目录后缀会随下载批次变成 `22.22.2-6`，路径一失效 Gradle 就报
+        #   「A problem occurred starting process '…node.exe'」⇒ assemble 直接失败。
+        #   ⇒ 每次同步后把它校正成当前真实路径（NODE 由 `_find_node()` 解析）。
+        #   ⚠️ repl 必须用 lambda：直接传字符串的话，`C:\Users\...` 里的 `\U` 会被
+        #      re 当成模板转义 ⇒ `re.PatternError: bad escape \U`（已实测踩过一次）。
+        c = re.sub(r'val executable = """[^"]*"""',
+                   lambda m: 'val executable = """%s"""' % NODE, c)
         with open(bt, 'w', encoding='utf-8') as f:
             f.write(c)
         print('   OK', flush=True)
