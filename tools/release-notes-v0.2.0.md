@@ -2,8 +2,8 @@
 
 | 平台 | 文件 | 说明 |
 |---|---|---|
-| **Windows** | `笑樱-测试版.exe` | 免安装单文件，双击即玩（依赖 WebView2，Win10/11 自带） |
-| **Android** | `笑樱-测试版.apk` | 建议 Android 8.0 以上 · arm64 · 需允许安装未知来源 |
+| **Windows** | `Xiaoying-v0.2.0-win-x64.exe` | 免安装单文件，双击即玩（依赖 WebView2，Win10/11 自带） |
+| **Android** | `Xiaoying-v0.2.0-android-arm64.apk` | 建议 Android 8.0 以上 · arm64 · 需允许安装未知来源 |
 
 > ⚠️ 这是**测试版**，全流程可玩但仍有未完成项，见文末「已知问题」。
 

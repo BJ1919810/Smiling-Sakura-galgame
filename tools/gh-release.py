@@ -11,9 +11,15 @@
 用法：
     python tools/gh-release.py --tag v0.2.0 --title "笑樱 v0.2.0 测试版" \
         --notes tools/release-notes-v0.2.0.md \
-        笑樱-测试版.exe 笑樱-测试版.apk
+        笑樱-测试版.exe=Xiaoying-v0.2.0-win-x64.exe \
+        笑樱-测试版.apk=Xiaoying-v0.2.0-android-arm64.apk
 
     python tools/gh-release.py --tag v0.2.0 --list          # 只看现有 release 与资产
+
+★ 资产名为什么必须 ASCII（2026-10-23 实测）：
+  GitHub **会把非 ASCII 的 asset 名剥成 `-`**（上传时 `?name=笑樱-测试版.exe`
+  ⇒ 实际资产叫 `-.exe`；用 PATCH 改名回读仍是 `-.exe`，说明是服务端剥离，不是编码问题）。
+  ⇒ 用 `本地路径=远端名` 的写法给 ASCII 名；不写则沿用本地文件名（中文名会变 `-`）。
 
 前置：本机代理已配在 git config（`http.https://github.com.proxy`），本脚本直接读它。
 """
@@ -180,10 +186,12 @@ def main():
         print(f'      {rel["html_url"]}')
 
         # ── 2. 上传资产（同名先删，避免 422）───────────────
-        for path in a.assets:
+        for spec in a.assets:
+            # 支持「本地路径=远端名」；Windows 路径不含 '='，partition 安全
+            path, _, remote = spec.partition('=')
             if not os.path.exists(path):
                 sys.exit(f'[x] 文件不存在：{path}')
-            name = os.path.basename(path)
+            name = remote or os.path.basename(path)
             size = os.path.getsize(path)
             for asst in rel.get('assets', []):
                 if asst['name'] == name:
